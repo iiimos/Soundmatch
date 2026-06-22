@@ -27,7 +27,7 @@ const DISCOVERY = {
 };
 
 const REDIRECT_URI = Platform.OS === 'web'
-  ? 'https://auth.expo.io/@iiimos/soundmatch'
+  ? 'http://localhost:8081'
   : makeRedirectUri({ scheme: 'soundmatch', path: 'spotify-auth-callback' });
 
 const SCOPES = [
@@ -47,15 +47,6 @@ const STORAGE_KEYS = {
 };
 
 export function createAuthRequest(): AuthRequest {
-  if (Platform.OS === 'web') {
-    return new AuthRequest({
-      clientId: CLIENT_ID,
-      scopes: SCOPES,
-      redirectUri: REDIRECT_URI,
-      responseType: ResponseType.Token,
-      usePKCE: false,
-    });
-  }
   return new AuthRequest({
     clientId: CLIENT_ID,
     scopes: SCOPES,
