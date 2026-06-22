@@ -1,0 +1,143 @@
+/* SoundMatch — sample track data
+   Two tracks carry REAL Spotify ids (So Long + Universal Music, Seba ·
+   Producer 06). The rest use the branded preview player. All metadata is
+   illustrative sample content for the prototype. */
+
+window.SM_TRACKS = [
+  {
+    id: 'solong',
+    title: 'So Long',
+    artist: 'Seba',
+    feat: 'Lo Tek',
+    album: 'Producer 06',
+    year: 2003,
+    label: 'Good Looking Records',
+    catalog: 'GLRD06',
+    bpm: 163,
+    duration: '9:03',
+    spotifyId: '6ChYON7kJVT2RNtKmQZaJL',
+    cover: 'https://i.scdn.co/image/ab67616d0000b273cda99731b36556d7ba9cbcc8',
+    q: 'Seba So Long Producer 06',
+    artistMatch: 'seba',
+    hue: 322,
+    tags: ['Atmospheric DnB', 'Liquid', 'Late-night'],
+    why: 'You’ve been deep in atmospheric drum & bass after midnight — this is the genre’s blueprint.',
+    bio: 'Seba — Sebastian Ahrenberg — is a Swedish drum & bass producer and founder of the Stockholm label Secret Operations. A cornerstone of the atmospheric / liquid sound, his work for Good Looking Records helped define the genre’s deeper, melodic end.',
+    matchPct: 96
+  },
+  {
+    id: 'universal',
+    title: 'Universal Music',
+    artist: 'Seba',
+    feat: 'Lo Tek',
+    album: 'Producer 06',
+    year: 2003,
+    label: 'Good Looking Records',
+    catalog: 'GLRD06',
+    bpm: 158,
+    duration: '10:15',
+    spotifyId: '2Siqag1d6oylvd9EgCjxY1',
+    cover: 'https://i.scdn.co/image/ab67616d0000b273cda99731b36556d7ba9cbcc8',
+    q: 'Seba Universal Music Producer 06',
+    artistMatch: 'seba',
+    hue: 296,
+    tags: ['Atmospheric DnB', 'Deep', 'Jazzy'],
+    why: 'A sister cut to a track you lingered on. Same session, same warmth.',
+    bio: 'Seba’s collaborations with vocalist Lo Tek run through the Producer 06 record, pairing rolling breakbeats with spacious, soulful pads.',
+    matchPct: 91
+  },
+  {
+    id: 'wayoflife',
+    title: 'A Way of Life',
+    artist: 'Big Bud',
+    feat: null,
+    album: 'Late Night Blues',
+    year: 2001,
+    label: 'Good Looking Records',
+    catalog: 'GLRLP004',
+    bpm: 168,
+    duration: '7:33',
+    spotifyId: null,
+    q: 'Big Bud Late Night Blues',
+    artistMatch: 'big bud',
+    hue: 268,
+    tags: ['Liquid', 'Soulful', 'Jazzy'],
+    why: 'Listeners who loved your last like played this next 8 times out of 10.',
+    bio: 'Big Bud is a London producer known for lush, jazz-inflected drum & bass — live instrumentation woven through warm, rolling breaks.',
+    matchPct: 89
+  },
+  {
+    id: 'twilight',
+    title: 'Twilight Voyage',
+    artist: 'LTJ Bukem',
+    feat: null,
+    album: 'Journey Inwards',
+    year: 2000,
+    label: 'Good Looking Records',
+    catalog: 'GLRLP003',
+    bpm: 170,
+    duration: '8:27',
+    spotifyId: null,
+    q: 'LTJ Bukem Journey Inwards',
+    artistMatch: 'bukem',
+    hue: 248,
+    tags: ['Atmospheric DnB', 'Ambient', 'Classic'],
+    why: 'A foundational record for the sound you keep coming back to.',
+    bio: 'LTJ Bukem is the architect of atmospheric drum & bass and the founder of Good Looking Records — his sets and productions shaped an entire melodic wing of the genre.',
+    matchPct: 87
+  },
+  {
+    id: 'heat',
+    title: 'Heat',
+    artist: 'Wax Doctor',
+    feat: null,
+    album: 'Atmospheric Funk',
+    year: 1996,
+    label: 'Metalheadz',
+    catalog: 'METH021',
+    bpm: 172,
+    duration: '7:16',
+    spotifyId: null,
+    q: 'Wax Doctor Heat',
+    artistMatch: 'wax doctor',
+    hue: 16,
+    tags: ['Funk', 'Deep'],
+    why: 'A warmer, funk-leaning detour from your usual late-night picks.',
+    bio: 'Wax Doctor is a pioneering UK producer whose mid-90s output bridged jazzy atmospherics and harder, rolling rhythms.',
+    matchPct: 83
+  },
+  {
+    id: 'resolution',
+    title: 'Resolution',
+    artist: 'Tayla',
+    feat: null,
+    album: 'Looking Good Vol. 1',
+    year: 1999,
+    label: 'Looking Good Records',
+    catalog: 'LGR012',
+    bpm: 169,
+    duration: '7:07',
+    spotifyId: null,
+    q: 'Tayla Resolution drum and bass',
+    artistMatch: 'tayla',
+    hue: 200,
+    tags: ['Liquid', 'Melodic', 'Late-night'],
+    why: 'Softer and more melodic — a gentle landing after the heavier cuts.',
+    bio: 'Tayla is a long-standing figure in liquid drum & bass, releasing across the Good Looking / Looking Good family of labels.',
+    matchPct: 80
+  }
+];
+
+/* Listening stats for the profile screen (sample) */
+window.SM_STATS = {
+  topGenres: [
+    { name: 'Atmospheric DnB', pct: 62 },
+    { name: 'Liquid', pct: 24 },
+    { name: 'Ambient', pct: 14 }
+  ],
+  minutes: 1840,
+  swipes: 312,
+  likeRate: 38,
+  streak: 12,
+  decade: '1996 – 2003'
+};

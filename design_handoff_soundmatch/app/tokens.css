@@ -1,0 +1,154 @@
+/* ============================================================
+   SoundMatch — Design System tokens
+   Sleek, premium, minimal. Deep aubergine. Michroma display.
+   ============================================================ */
+
+:root {
+  /* ---- Surfaces (deep aubergine, near-black, restrained chroma) ---- */
+  --sm-bg:        oklch(0.150 0.026 318);   /* app canvas            */
+  --sm-bg-grad:   oklch(0.185 0.034 320);   /* top of ambient grad   */
+  --sm-surface:   oklch(0.205 0.030 318);   /* card / panel          */
+  --sm-surface-2: oklch(0.250 0.036 320);   /* elevated / sheet      */
+  --sm-surface-3: oklch(0.300 0.040 320);   /* hover / chips         */
+
+  /* ---- Hairlines & strokes (warm violet, low alpha) ---- */
+  --sm-line:        rgba(232, 214, 250, 0.085);
+  --sm-line-strong: rgba(232, 214, 250, 0.150);
+
+  /* ---- Text ---- */
+  --sm-text:    oklch(0.965 0.010 320);  /* hi   */
+  --sm-text-2:  oklch(0.760 0.022 320);  /* mid  */
+  --sm-text-3:  oklch(0.575 0.028 320);  /* low  */
+
+  /* ---- Accent (orchid). Tweakable via --sm-accent. ---- */
+  --sm-accent:       oklch(0.730 0.122 322);
+  --sm-accent-press: oklch(0.660 0.130 322);
+  --sm-accent-ink:   oklch(0.150 0.040 322);   /* text on accent */
+  --sm-accent-soft:  oklch(0.730 0.122 322 / 0.14);
+  --sm-accent-line:  oklch(0.730 0.122 322 / 0.40);
+
+  /* ---- Swipe feedback ---- */
+  --sm-like:  oklch(0.700 0.150 248);   /* right / heart — blue  */
+  --sm-nope:  oklch(0.630 0.205 22);    /* left  / X     — red   */
+  --sm-like-glow: oklch(0.700 0.150 248 / 0.55);
+  --sm-nope-glow: oklch(0.630 0.205 22  / 0.55);
+
+  /* ---- Spotify (only inside real embeds / export) ---- */
+  --sm-spotify: #1ed760;
+
+  /* ---- Radii ---- */
+  --r-card: 30px;
+  --r-lg:   22px;
+  --r-md:   16px;
+  --r-sm:   11px;
+  --r-pill: 999px;
+
+  /* ---- Shadow & glow ---- */
+  --shadow-card: 0 2px 4px rgba(0,0,0,0.4), 0 28px 64px -24px rgba(0,0,0,0.85);
+  --shadow-sheet: 0 -8px 40px -8px rgba(0,0,0,0.6);
+  --shadow-float: 0 8px 24px -8px rgba(0,0,0,0.7);
+
+  /* ---- Type ---- */
+  --font-display: 'Michroma', 'SF Pro Display', system-ui, sans-serif;
+  --font-ui: 'Hanken Grotesk', -apple-system, system-ui, sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, 'SF Mono', monospace;
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+* { box-sizing: border-box; }
+
+.sm-root {
+  font-family: var(--font-ui);
+  color: var(--sm-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Brand / display helpers */
+.sm-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+  font-weight: 400;
+}
+.sm-mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.sm-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--sm-text-3);
+}
+
+/* Hide scrollbars inside screens */
+.sm-noscroll::-webkit-scrollbar { width: 0; height: 0; }
+.sm-noscroll { scrollbar-width: none; -ms-overflow-style: none; }
+
+/* ============================================================
+   Album-cover placeholder (no hand-drawn art)
+   ============================================================ */
+.sm-cover-ph {
+  position: relative;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(135deg,
+      oklch(0.27 0.05 320) 0 2px,
+      oklch(0.23 0.045 320) 2px 11px);
+}
+.sm-cover-ph::after {
+  content: attr(data-ph);
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--sm-text-3);
+}
+
+/* ============================================================
+   Keyframes
+   ============================================================ */
+@keyframes sm-rise   { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes sm-pop    { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes sm-pulse  { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+@keyframes sm-eq     { 0%,100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
+@keyframes sm-sheen  { from { transform: translateX(-130%); } to { transform: translateX(130%); } }
+@keyframes sm-spin   { to { transform: rotate(360deg); } }
+
+/* Equalizer bars (now-playing indicator) */
+.sm-eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 13px; }
+.sm-eq i {
+  width: 2.5px; height: 100%; border-radius: 2px;
+  background: var(--sm-accent);
+  transform-origin: bottom;
+  animation: sm-eq 0.9s ease-in-out infinite;
+}
+.sm-eq i:nth-child(2) { animation-delay: 0.25s; }
+.sm-eq i:nth-child(3) { animation-delay: 0.5s; }
+.sm-eq i:nth-child(4) { animation-delay: 0.15s; }
+
+/* Tap affordance */
+.sm-tap { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease; }
+.sm-tap:active { transform: scale(0.94); }
+
+/* Swipe action buttons */
+.sm-act {
+  width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: var(--sm-surface-2); border: 1px solid var(--sm-line-strong);
+  box-shadow: var(--shadow-float);
+  transition: transform 0.14s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+.sm-act:active { transform: scale(0.9); }
+.sm-act.like { width: 76px; height: 76px; }
+.sm-act.like:hover { border-color: var(--sm-like); box-shadow: 0 0 0 1px var(--sm-like), 0 0 30px 0 var(--sm-like-glow); }
+.sm-act.nope:hover { border-color: var(--sm-nope); box-shadow: 0 0 0 1px var(--sm-nope), 0 0 26px -2px var(--sm-nope-glow); }
+.sm-act:disabled { cursor: default; }
+
+/* Range slider (onboarding taste dials) */
+.sm-range { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 4px; background: var(--sm-surface-3); outline: none; }
+.sm-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; border-radius: 50%; background: var(--sm-accent); border: 3px solid var(--sm-bg); box-shadow: 0 2px 10px -2px var(--sm-accent-soft); cursor: pointer; }
+.sm-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--sm-accent); border: 3px solid var(--sm-bg); cursor: pointer; }

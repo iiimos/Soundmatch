@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Soundmatch",
+    "slug": "soundmatch",
+    "scheme": "soundmatch",
+    "version": "1.0.0",
+    "sdkVersion": "56.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.soundmatch.app",
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": ["soundmatch"]
+          }
+        ]
+      }
+    },
+    "android": {
+      "package": "com.soundmatch.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0D0D0D"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "soundmatch",
+              "host": "spotify-auth-callback"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}

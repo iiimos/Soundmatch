@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoundMatch · Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=Hanken+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app/tokens.css">
+<style>
+  html, body { margin: 0; background: var(--sm-bg); }
+  body {
+    font-family: var(--font-ui); color: var(--sm-text);
+    background:
+      radial-gradient(120% 90% at 12% -8%, var(--sm-bg-grad) 0%, transparent 55%),
+      radial-gradient(100% 80% at 100% 0%, oklch(0.22 0.05 322) 0%, transparent 45%),
+      var(--sm-bg);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 40px; }
+
+  /* Hero */
+  .hero { padding: 96px 0 64px; border-bottom: 1px solid var(--sm-line); }
+  .brand-row { display: flex; align-items: center; gap: 16px; margin-bottom: 30px; }
+  .logo-mark {
+    width: 46px; height: 46px; border-radius: 13px; position: relative; flex-shrink: 0;
+    background: linear-gradient(150deg, var(--sm-accent), oklch(0.55 0.14 318));
+    box-shadow: 0 0 0 1px var(--sm-accent-line), 0 10px 30px -8px var(--sm-accent-soft);
+    display: grid; place-items: center;
+  }
+  .logo-mark .eq { height: 18px; gap: 2.5px; }
+  .logo-mark .eq i { background: var(--sm-accent-ink); width: 3px; }
+  .wordmark { font-family: var(--font-display); font-size: 25px; letter-spacing: 0.02em; }
+  .wordmark b { font-weight: 400; color: var(--sm-accent); }
+  .hero h1 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(34px, 5.5vw, 60px); line-height: 1.08; letter-spacing: 0.005em;
+    margin: 0 0 22px; max-width: 16ch;
+  }
+  .hero p { font-size: 18px; line-height: 1.6; color: var(--sm-text-2); max-width: 62ch; margin: 0; }
+  .meta-strip { display: flex; flex-wrap: wrap; gap: 10px 14px; margin-top: 34px; }
+  .meta-strip span {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--sm-text-2); border: 1px solid var(--sm-line-strong);
+    padding: 7px 13px; border-radius: var(--r-pill);
+  }
+
+  /* Section scaffold */
+  section { padding: 64px 0; border-bottom: 1px solid var(--sm-line); }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 34px; }
+  .sec-num { font-family: var(--font-mono); font-size: 12px; color: var(--sm-accent); letter-spacing: 0.1em; }
+  .sec-head h2 { font-family: var(--font-display); font-weight: 400; font-size: 22px; margin: 0; letter-spacing: 0.01em; }
+  .sec-note { margin-left: auto; font-size: 13.5px; color: var(--sm-text-3); max-width: 38ch; text-align: right; line-height: 1.5; }
+
+  .grid { display: grid; gap: 18px; }
+
+  /* Color */
+  .swatches { grid-template-columns: repeat(4, 1fr); }
+  .swatch { border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--sm-line); }
+  .swatch .chip { height: 92px; }
+  .swatch .info { padding: 12px 14px; background: var(--sm-surface); }
+  .swatch .nm { font-size: 13px; font-weight: 600; }
+  .swatch .vl { font-family: var(--font-mono); font-size: 10.5px; color: var(--sm-text-3); margin-top: 3px; word-break: break-all; }
+
+  /* Type */
+  .type-card { background: var(--sm-surface); border: 1px solid var(--sm-line); border-radius: var(--r-lg); padding: 30px 32px; margin-bottom: 16px; }
+  .type-card .lab { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .type-card .lab .role { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sm-accent); }
+  .type-card .lab .spec { font-family: var(--font-mono); font-size: 11px; color: var(--sm-text-3); }
+  .samp-display { font-family: var(--font-display); font-size: 40px; line-height: 1.12; margin: 0; }
+  .samp-ui { font-size: 26px; font-weight: 500; margin: 0; line-height: 1.3; }
+  .samp-ui .w300 { font-weight: 300; color: var(--sm-text-2); }
+  .samp-mono { font-family: var(--font-mono); font-size: 17px; margin: 0; color: var(--sm-text-2); }
+  .scale-row { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; margin-top: 8px; }
+  .scale-row span { font-family: var(--font-display); }
+
+  /* Generic cards */
+  .panel { background: var(--sm-surface); border: 1px solid var(--sm-line); border-radius: var(--r-lg); padding: 24px; }
+  .panel h3 { font-size: 13px; font-family: var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--sm-text-3); margin: 0 0 18px; font-weight: 400; }
+
+  /* Buttons */
+  .btn { font-family: var(--font-ui); font-weight: 600; font-size: 15px; border: none; cursor: pointer; border-radius: var(--r-pill); padding: 14px 26px; display: inline-flex; align-items: center; gap: 9px; transition: transform 0.12s, filter 0.15s; }
+  .btn:active { transform: scale(0.96); }
+  .btn-primary { background: var(--sm-accent); color: var(--sm-accent-ink); box-shadow: 0 8px 26px -10px var(--sm-accent-soft); }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-ghost { background: transparent; color: var(--sm-text); border: 1px solid var(--sm-line-strong); }
+  .btn-ghost:hover { background: var(--sm-surface-3); }
+  .btn-spotify { background: var(--sm-spotify); color: #06210f; }
+
+  /* Action (swipe) buttons */
+  .actions { display: flex; gap: 22px; align-items: center; }
+  .act {
+    width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--sm-surface-2); border: 1px solid var(--sm-line-strong); cursor: pointer;
+    transition: transform 0.14s, box-shadow 0.2s, border-color 0.2s;
+  }
+  .act:active { transform: scale(0.9); }
+  .act.nope:hover { border-color: var(--sm-nope); box-shadow: 0 0 0 1px var(--sm-nope), 0 0 28px -2px var(--sm-nope-glow); }
+  .act.like { width: 76px; height: 76px; }
+  .act.like:hover { border-color: var(--sm-like); box-shadow: 0 0 0 1px var(--sm-like), 0 0 32px 0 var(--sm-like-glow); }
+  .act svg { width: 26px; height: 26px; }
+  .act.like svg { width: 30px; height: 30px; }
+
+  /* Chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip-tag { font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: var(--r-pill); background: var(--sm-accent-soft); color: var(--sm-accent); border: 1px solid var(--sm-accent-line); }
+  .chip-tag.plain { background: var(--sm-surface-3); color: var(--sm-text-2); border-color: var(--sm-line); }
+
+  /* Glow demo */
+  .glow-demo { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .glow-card { position: relative; height: 190px; border-radius: var(--r-lg); border: 1px solid var(--sm-line); overflow: hidden; display: grid; place-items: center; background: var(--sm-surface); }
+  .glow-card .face { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; z-index: 2; }
+  .glow-card .stamp { z-index: 2; font-family: var(--font-display); font-size: 26px; padding: 6px 16px; border-radius: 12px; border: 2.5px solid; }
+  .glow-card.right { box-shadow: inset 0 0 60px -6px var(--sm-like-glow), 0 0 0 1px var(--sm-like) inset; }
+  .glow-card.right .stamp { color: var(--sm-like); border-color: var(--sm-like); transform: rotate(-12deg); }
+  .glow-card.left { box-shadow: inset 0 0 60px -6px var(--sm-nope-glow), 0 0 0 1px var(--sm-nope) inset; }
+  .glow-card.left .stamp { color: var(--sm-nope); border-color: var(--sm-nope); transform: rotate(12deg); }
+
+  /* radii / elevation */
+  .radii { display: flex; gap: 18px; flex-wrap: wrap; }
+  .radii div { width: 96px; height: 96px; background: var(--sm-surface-2); border: 1px solid var(--sm-line-strong); display: grid; place-items: end center; padding-bottom: 8px; font-family: var(--font-mono); font-size: 10px; color: var(--sm-text-3); }
+
+  /* mini player */
+  .player { background: var(--sm-surface-2); border: 1px solid var(--sm-line); border-radius: var(--r-md); padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+  .player .pp { width: 44px; height: 44px; border-radius: 50%; background: var(--sm-accent); color: var(--sm-accent-ink); display: grid; place-items: center; flex-shrink: 0; }
+  .player .pp svg { width: 17px; height: 17px; margin-left: 2px; }
+  .player .body { flex: 1; min-width: 0; }
+  .player .top { display: flex; justify-content: space-between; font-size: 11px; font-family: var(--font-mono); color: var(--sm-text-3); margin-bottom: 8px; }
+  .player .bar { height: 4px; border-radius: 3px; background: var(--sm-line-strong); position: relative; overflow: hidden; }
+  .player .bar i { position: absolute; inset: 0 62% 0 0; background: var(--sm-accent); border-radius: 3px; }
+
+  .twocol { grid-template-columns: 1fr 1fr; align-items: start; }
+  .foot { padding: 48px 0 80px; color: var(--sm-text-3); font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; }
+  @media (max-width: 720px) { .swatches, .twocol, .glow-demo { grid-template-columns: 1fr 1fr; } .wrap { padding: 0 22px; } .sec-note { display: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="brand-row">
+      <div class="logo-mark"><span class="sm-eq eq"><i></i><i></i><i></i><i></i></span></div>
+      <div class="wordmark">SOUND<b>MATCH</b></div>
+    </div>
+    <h1>Swipe into your next favourite track.</h1>
+    <p>SoundMatch is a discovery app with the heartbeat of a dating app — every card is a song to fall for. This is its design language: sleek, restrained, built on deep aubergine and the wide geometry of Michroma.</p>
+    <div class="meta-strip">
+      <span>iOS · 402 × 874</span>
+      <span>Deep Aubergine</span>
+      <span>Michroma / Hanken / Space Mono</span>
+      <span>v1.0</span>
+    </div>
+  </header>
+
+  <!-- COLOR -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">01</span><h2>Colour</h2>
+      <p class="sec-note">Restrained chroma, near-black aubergine surfaces. Blue & red are reserved exclusively for swipe feedback; green only ever appears inside a real Spotify embed.</p>
+    </div>
+
+    <div class="sm-eyebrow" style="margin-bottom:14px;">Surfaces</div>
+    <div class="grid swatches" style="margin-bottom:30px;">
+      <div class="swatch"><div class="chip" style="background:var(--sm-bg)"></div><div class="info"><div class="nm">Canvas</div><div class="vl">oklch(.150 .026 318)</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--sm-surface)"></div><div class="info"><div class="nm">Surface</div><div class="vl">oklch(.205 .030 318)</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--sm-surface-2)"></div><div class="info"><div class="nm">Elevated</div><div class="vl">oklch(.250 .036 320)</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--sm-surface-3)"></div><div class="info"><div class="nm">Chip / Hover</div><div class="vl">oklch(.300 .040 320)</div></div></div>
+    </div>
+
+    <div class="sm-eyebrow" style="margin-bottom:14px;">Accent · Text · Feedback</div>
+    <div class="grid swatches">
+      <div class="swatch"><div class="chip" style="background:var(--sm-accent)"></div><div class="info"><div class="nm">Accent · Orchid</div><div class="vl">oklch(.730 .122 322)</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--sm-text)"></div><div class="info"><div class="nm">Text · Hi</div><div class="vl">oklch(.965 .010 320)</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--sm-text-2)"></div><div class="info"><div class="nm">Text · Mid</div><div class="vl">oklch(.760 .022 320)</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--sm-text-3)"></div><div class="info"><div class="nm">Text · Low</div><div class="vl">oklch(.575 .028 320)</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--sm-like)"></div><div class="info"><div class="nm">Like · Blue</div><div class="vl">oklch(.700 .150 248)</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--sm-nope)"></div><div class="info"><div class="nm">Nope · Red</div><div class="vl">oklch(.630 .205 22)</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--sm-spotify)"></div><div class="info"><div class="nm">Spotify</div><div class="vl">#1ed760 · embeds only</div></div></div>
+      <div class="swatch"><div class="chip" style="background:linear-gradient(150deg,var(--sm-accent),oklch(0.55 0.14 318))"></div><div class="info"><div class="nm">Brand Gradient</div><div class="vl">orchid → violet</div></div></div>
+    </div>
+  </section>
+
+  <!-- TYPE -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">02</span><h2>Typography</h2>
+      <p class="sec-note">Michroma carries brand & track titles. Hanken Grotesk does the readable work. Space Mono labels the technical detail — BPM, catalogue, runtimes.</p>
+    </div>
+
+    <div class="type-card">
+      <div class="lab"><span class="role">Display · Michroma</span><span class="spec">Brand · track titles · numerals</span></div>
+      <p class="samp-display">So Long</p>
+      <div class="scale-row">
+        <span style="font-size:40px">Aa</span><span style="font-size:30px">Discover</span><span style="font-size:22px">Liked</span><span style="font-size:16px">04:12</span>
+      </div>
+    </div>
+
+    <div class="type-card">
+      <div class="lab"><span class="role">UI · Hanken Grotesk</span><span class="spec">300 / 400 / 500 / 600 / 700</span></div>
+      <p class="samp-ui">Based on your late-night listening, <span class="w300">we think this one is a match.</span></p>
+    </div>
+
+    <div class="type-card">
+      <div class="lab"><span class="role">Mono · Space Mono</span><span class="spec">Metadata · eyebrows · stats</span></div>
+      <p class="samp-mono">GLRD06 · 163 BPM · 2003 · GOOD LOOKING RECORDS</p>
+    </div>
+  </section>
+
+  <!-- RADII + ELEVATION -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2>Form &amp; Elevation</h2>
+      <p class="sec-note">Generous, soft radii. Cards float on long, dark, diffuse shadows — never harsh.</p>
+    </div>
+    <div class="grid twocol">
+      <div class="panel">
+        <h3>Corner radii</h3>
+        <div class="radii">
+          <div style="border-radius:var(--r-card)">30 · card</div>
+          <div style="border-radius:var(--r-lg)">22 · panel</div>
+          <div style="border-radius:var(--r-md)">16 · field</div>
+          <div style="border-radius:var(--r-sm)">11 · chip</div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Elevation</h3>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;padding:8px 4px 4px;">
+          <div style="width:120px;height:96px;border-radius:var(--r-lg);background:var(--sm-surface-2);box-shadow:var(--shadow-float);display:grid;place-items:end center;padding-bottom:8px;font-family:var(--font-mono);font-size:10px;color:var(--sm-text-3)">float</div>
+          <div style="width:120px;height:96px;border-radius:var(--r-card);background:var(--sm-surface-2);box-shadow:var(--shadow-card);display:grid;place-items:end center;padding-bottom:8px;font-family:var(--font-mono);font-size:10px;color:var(--sm-text-3)">card</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPONENTS -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2>Components</h2>
+      <p class="sec-note">The vocabulary that builds every screen.</p>
+    </div>
+
+    <div class="grid twocol" style="margin-bottom:18px;">
+      <div class="panel">
+        <h3>Buttons</h3>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+          <button class="btn btn-primary">Tune my taste</button>
+          <button class="btn btn-ghost">Skip</button>
+          <button class="btn btn-spotify">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#06210f"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.6 14.4a.62.62 0 01-.86.21c-2.35-1.44-5.3-1.76-8.79-.96a.62.62 0 11-.28-1.22c3.81-.87 7.08-.5 9.72 1.11.3.18.39.57.21.86zm1.23-2.74a.78.78 0 01-1.07.26c-2.69-1.65-6.79-2.13-9.97-1.17a.78.78 0 11-.45-1.49c3.63-1.1 8.15-.56 11.24 1.33.36.22.48.69.25 1.07zm.1-2.85C14.43 8.94 9.1 8.76 6.02 9.7a.93.93 0 11-.54-1.79c3.53-1.07 9.42-.86 13.13 1.34a.94.94 0 01-.95 1.61z"/></svg>
+            Export
+          </button>
+        </div>
+        <div style="height:22px"></div>
+        <h3>Tags · Genre &amp; Mood</h3>
+        <div class="chips">
+          <span class="chip-tag">Atmospheric DnB</span>
+          <span class="chip-tag">Liquid</span>
+          <span class="chip-tag plain">Late-night</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Swipe actions</h3>
+        <div class="actions" style="margin-bottom:8px;">
+          <div class="act nope" title="Dislike">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--sm-nope)" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </div>
+          <div class="act like" title="Like">
+            <svg viewBox="0 0 24 24" fill="var(--sm-like)"><path d="M12 21s-7.5-4.9-10.2-9.3C-.2 8.1 1.7 4 5.4 4c2.1 0 3.5 1.2 4.6 2.6C11.1 5.2 12.5 4 14.6 4c3.7 0 5.6 4.1 3.6 7.7C19.5 16.1 12 21 12 21z"/></svg>
+          </div>
+          <div class="act" title="Rewind">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--sm-text-2)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4v6h6M3.5 10a9 9 0 1 1 .8 7"/></svg>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--sm-text-3);line-height:1.5;margin:14px 0 0;">Big, thumb-friendly targets (≥64px) double as the accessible path for anyone who can’t drag. Like grows to 76px as the primary action.</p>
+      </div>
+    </div>
+
+    <div class="grid twocol">
+      <div class="panel">
+        <h3>Preview player · branded</h3>
+        <div class="player">
+          <div class="pp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+          <div class="body">
+            <div class="top"><span>SO LONG · 0:11</span><span>0:30</span></div>
+            <div class="bar"><i></i></div>
+          </div>
+          <span class="sm-eq" style="margin-left:4px"><i></i><i></i><i></i><i></i></span>
+        </div>
+        <p style="font-size:13px;color:var(--sm-text-3);line-height:1.5;margin:14px 0 0;">Fully on-brand 30-second preview. The real Spotify embed (dark <code style="font-family:var(--font-mono)">theme=0</code>) sits behind a toggle — Spotify can’t be tinted aubergine, so we frame it instead.</p>
+      </div>
+
+      <div class="panel">
+        <h3>Swipe feedback</h3>
+        <div class="glow-demo">
+          <div class="glow-card left"><span class="stamp">NOPE</span></div>
+          <div class="glow-card right"><span class="stamp">LIKE</span></div>
+        </div>
+        <p style="font-size:13px;color:var(--sm-text-3);line-height:1.5;margin:14px 0 0;">Drag right → blue bloom + LIKE stamp. Drag left → red bloom + NOPE. Intensity tracks drag distance.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot wrap" style="padding-left:0;padding-right:0;">SOUNDMATCH · DESIGN SYSTEM · 2026</div>
+</div>
+</body>
+</html>
