@@ -3,6 +3,7 @@ import {
   AuthRequest,
   exchangeCodeAsync,
   refreshAsync,
+  ResponseType,
   TokenResponse,
 } from 'expo-auth-session';
 import * as SecureStoreNative from 'expo-secure-store';
@@ -26,10 +27,8 @@ const DISCOVERY = {
 };
 
 const REDIRECT_URI = Platform.OS === 'web'
-  ? makeRedirectUri({ preferLocalhost: true })
+  ? 'https://auth.expo.io/@iiimos/soundmatch'
   : makeRedirectUri({ scheme: 'soundmatch', path: 'spotify-auth-callback' });
-
-console.log('[Soundmatch] Redirect URI:', REDIRECT_URI);
 
 const SCOPES = [
   'user-read-private',
@@ -48,12 +47,31 @@ const STORAGE_KEYS = {
 };
 
 export function createAuthRequest(): AuthRequest {
+  if (Platform.OS === 'web') {
+    return new AuthRequest({
+      clientId: CLIENT_ID,
+      scopes: SCOPES,
+      redirectUri: REDIRECT_URI,
+      responseType: ResponseType.Token,
+      usePKCE: false,
+    });
+  }
   return new AuthRequest({
     clientId: CLIENT_ID,
     scopes: SCOPES,
     redirectUri: REDIRECT_URI,
     usePKCE: true,
   });
+}
+
+export async function handleWebAuthResponse(params: { access_token?: string; expires_in?: string }): Promise<void> {
+  const { access_token, expires_in } = params;
+  if (!access_token) throw new Error('No access token received');
+  const expiryTime = Date.now() + (parseInt(expires_in ?? '3600', 10)) * 1000;
+
+  await SecureStore.setItemAsync(STORAGE_KEYS.ACCESS_TOKEN, access_token);
+  await SecureStore.setItemAsync(STORAGE_KEYS.TOKEN_EXPIRY, expiryTime.toString());
+  useStore.getState().setTokens(access_token, '');
 }
 
 export async function exchangeCode(code: string, request: AuthRequest): Promise<void> {
@@ -88,7 +106,7 @@ export async function restoreSession(): Promise<boolean> {
   const refreshToken = await SecureStore.getItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
   const expiryStr = await SecureStore.getItemAsync(STORAGE_KEYS.TOKEN_EXPIRY);
 
-  if (!accessToken || !refreshToken) return false;
+  if (!accessToken) return false;
 
   const expiry = expiryStr ? parseInt(expiryStr, 10) : 0;
   if (Date.now() >= expiry) {

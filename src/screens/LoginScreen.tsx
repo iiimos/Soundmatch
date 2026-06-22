@@ -5,12 +5,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { COLORS, SPACING } from '../constants/theme';
 import {
   createAuthRequest,
   exchangeCode,
+  handleWebAuthResponse,
   fetchUserProfile,
   DISCOVERY,
 } from '../services/spotify';
@@ -34,13 +36,32 @@ export default function LoginScreen() {
     setError(null);
 
     try {
-      const result = await request.promptAsync(DISCOVERY);
+      if (Platform.OS === 'web') {
+        const authUrl = await request.makeAuthUrlAsync(DISCOVERY);
+        const result = await WebBrowser.openAuthSessionAsync(authUrl, 'https://auth.expo.io/@iiimos/soundmatch');
 
-      if (result.type === 'success' && result.params.code) {
-        await exchangeCode(result.params.code, request);
-        await fetchUserProfile();
-      } else if (result.type === 'error') {
-        setError(result.params.error_description ?? 'Authentication failed');
+        if (result.type === 'success' && result.url) {
+          const url = new URL(result.url);
+          const hashParams = new URLSearchParams(url.hash.substring(1));
+          const accessToken = hashParams.get('access_token');
+          const expiresIn = hashParams.get('expires_in');
+
+          if (accessToken) {
+            await handleWebAuthResponse({ access_token: accessToken, expires_in: expiresIn ?? '3600' });
+            await fetchUserProfile();
+          } else {
+            setError('No access token received');
+          }
+        }
+      } else {
+        const result = await request.promptAsync(DISCOVERY);
+
+        if (result.type === 'success' && result.params.code) {
+          await exchangeCode(result.params.code, request);
+          await fetchUserProfile();
+        } else if (result.type === 'error') {
+          setError(result.params.error_description ?? 'Authentication failed');
+        }
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong');
