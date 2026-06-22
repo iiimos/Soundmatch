@@ -175,25 +175,21 @@ export async function fetchRecommendations(options: {
   seedArtistIds?: string[];
   limit?: number;
 }): Promise<Track[]> {
-  const { seedGenres = [], seedTrackIds = [], seedArtistIds = [], limit = 20 } = options;
+  const { seedGenres = [], limit = 20 } = options;
+  const genres = seedGenres.length > 0 ? seedGenres : ['pop', 'electronic'];
+  const genre = genres[Math.floor(Math.random() * genres.length)];
+  const year = 2015 + Math.floor(Math.random() * 11);
+  const offset = Math.floor(Math.random() * 50);
 
-  const params = new URLSearchParams();
-  params.set('limit', limit.toString());
-
-  if (seedTrackIds.length > 0 || seedArtistIds.length > 0) {
-    if (seedTrackIds.length > 0) params.set('seed_tracks', seedTrackIds.slice(0, 5).join(','));
-    if (seedArtistIds.length > 0) params.set('seed_artists', seedArtistIds.slice(0, 5 - seedTrackIds.length).join(','));
-  } else {
-    const genres = seedGenres.length > 0 ? seedGenres : ['pop', 'electronic'];
-    params.set('seed_genres', genres.slice(0, 5).join(','));
-  }
-
-  const response = await apiFetch(`/recommendations?${params.toString()}`);
+  const query = encodeURIComponent(`genre:${genre} year:${year}`);
+  const response = await apiFetch(`/search?q=${query}&type=track&limit=${limit}&offset=${offset}`);
   const data = await response.json();
 
-  if (!data.tracks) return [];
+  if (!data.tracks?.items) return [];
 
-  return data.tracks.map((track: SpotifyTrack) => ({
+  const shuffled = data.tracks.items.sort(() => Math.random() - 0.5);
+
+  return shuffled.map((track: SpotifyTrack) => ({
     id: track.id,
     name: track.name,
     artist: track.artists.map((a: { name: string }) => a.name).join(', '),
