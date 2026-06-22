@@ -169,37 +169,79 @@ async function apiFetch(endpoint: string, options: RequestInit = {}): Promise<Re
   return response;
 }
 
+function mapTracks(items: SpotifyTrack[]): Track[] {
+  return items
+    .filter((track) => track && track.id)
+    .map((track) => ({
+      id: track.id,
+      name: track.name,
+      artist: track.artists.map((a: { name: string }) => a.name).join(', '),
+      albumCover: track.album?.images?.[0]?.url ?? '',
+      previewUrl: track.preview_url ?? null,
+      albumName: track.album?.name ?? '',
+      genres: [],
+      uri: track.uri,
+    }));
+}
+
+async function searchTracks(query: string, limit: number, offset: number): Promise<SpotifyTrack[]> {
+  const url = `/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}&offset=${offset}`;
+  console.log('[Soundmatch] Search:', query, 'offset', offset);
+  const response = await apiFetch(url);
+  if (!response.ok) {
+    const text = await response.text();
+    console.log('[Soundmatch] Search failed', response.status, text);
+    return [];
+  }
+  const data = await response.json();
+  const items = data.tracks?.items ?? [];
+  console.log('[Soundmatch] Search returned', items.length, 'tracks');
+  return items;
+}
+
 export async function fetchRecommendations(options: {
   seedGenres?: string[];
   seedTrackIds?: string[];
   seedArtistIds?: string[];
   limit?: number;
 }): Promise<Track[]> {
-  const { seedGenres = [], limit = 20 } = options;
-  const genres = seedGenres.length > 0 ? seedGenres : ['pop', 'electronic'];
+  const { seedGenres = [], seedArtistIds = [], limit = 20 } = options;
+
+  // If we have artist seeds (from a playlist), use one of them as a search keyword.
+  if (seedArtistIds.length > 0) {
+    try {
+      const artistId = seedArtistIds[Math.floor(Math.random() * seedArtistIds.length)];
+      const response = await apiFetch(`/artists/${artistId}/top-tracks?market=US`);
+      if (response.ok) {
+        const data = await response.json();
+        const tracks = mapTracks(data.tracks ?? []);
+        if (tracks.length > 0) return tracks.sort(() => Math.random() - 0.5);
+      }
+    } catch (e) {
+      console.log('[Soundmatch] Artist seed fetch failed', e);
+    }
+  }
+
+  const genres = seedGenres.length > 0 ? seedGenres : ['pop', 'rock', 'hip-hop', 'electronic'];
   const genre = genres[Math.floor(Math.random() * genres.length)];
-  const year = 2015 + Math.floor(Math.random() * 11);
-  const offset = Math.floor(Math.random() * 50);
-
   const genreQuery = genre.replace(/-/g, ' ');
-  const query = encodeURIComponent(`genre:"${genreQuery}" year:${year}`);
-  const response = await apiFetch(`/search?q=${query}&type=track&limit=${limit}&offset=${offset}`);
-  const data = await response.json();
+  const offset = Math.floor(Math.random() * 100);
 
-  if (!data.tracks?.items) return [];
+  // Strategy 1: genre + year filter (precise but can be empty)
+  const year = 2010 + Math.floor(Math.random() * 16);
+  let items = await searchTracks(`genre:"${genreQuery}" year:${year}`, limit, offset % 100);
 
-  const shuffled = data.tracks.items.sort(() => Math.random() - 0.5);
+  // Strategy 2: genre filter only
+  if (items.length === 0) {
+    items = await searchTracks(`genre:"${genreQuery}"`, limit, offset % 100);
+  }
 
-  return shuffled.map((track: SpotifyTrack) => ({
-    id: track.id,
-    name: track.name,
-    artist: track.artists.map((a: { name: string }) => a.name).join(', '),
-    albumCover: track.album.images[0]?.url ?? '',
-    previewUrl: track.preview_url ?? null,
-    albumName: track.album.name,
-    genres: [],
-    uri: track.uri,
-  }));
+  // Strategy 3: plain keyword (always returns something)
+  if (items.length === 0) {
+    items = await searchTracks(genreQuery, limit, offset % 50);
+  }
+
+  return mapTracks(items).sort(() => Math.random() - 0.5);
 }
 
 interface SpotifyTrack {

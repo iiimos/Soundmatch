@@ -33,12 +33,14 @@ export default function DiscoverScreen() {
         seedTrackIds: tasteProfile.seedTrackIds,
         seedArtistIds: tasteProfile.seedArtistIds,
       });
+      console.log('[Soundmatch] Discover loaded', tracks.length, 'tracks');
       if (append) {
         setRecommendations([...useStore.getState().recommendations, ...tracks]);
       } else {
         setRecommendations(tracks);
       }
     } catch (e: unknown) {
+      console.log('[Soundmatch] Discover error', e);
       setError(e instanceof Error ? e.message : 'Failed to load recommendations');
     } finally {
       setLoading(false);
