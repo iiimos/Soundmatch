@@ -7,7 +7,7 @@ import { fetchRecommendations } from '../services/spotify';
 import { Track } from '../types';
 import CardStack from '../components/CardStack';
 import SeedFilterModal from '../components/SeedFilterModal';
-import { COLORS, SPACING, RADII } from '../constants/theme';
+import { COLORS, SPACING, RADII, FONTS } from '../constants/theme';
 
 export default function DiscoverScreen() {
   const isFocused = useIsFocused();
@@ -149,6 +149,7 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: 10.5,
+    fontFamily: FONTS.mono,
     letterSpacing: 2.2,
     color: COLORS.textMuted,
     marginBottom: 7,
@@ -156,7 +157,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 26,
-    fontWeight: '400',
+    fontFamily: FONTS.display,
     color: COLORS.text,
     letterSpacing: 0.3,
   },

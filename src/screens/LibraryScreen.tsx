@@ -14,7 +14,7 @@ import { createAudioPlayer, setAudioModeAsync, AudioPlayer } from 'expo-audio';
 import { useStore } from '../store/useStore';
 import { exportToSpotify } from '../services/spotify';
 import { Track } from '../types';
-import { COLORS, SPACING, RADII } from '../constants/theme';
+import { COLORS, SPACING, RADII, FONTS } from '../constants/theme';
 
 export default function LibraryScreen() {
   const likedTracks = useStore((s) => s.likedTracks);
@@ -255,13 +255,14 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: 10.5,
+    fontFamily: FONTS.mono,
     letterSpacing: 2.2,
     color: COLORS.textMuted,
     marginBottom: 7,
   },
   title: {
     fontSize: 26,
-    fontWeight: '400',
+    fontFamily: FONTS.display,
     color: COLORS.text,
     letterSpacing: 0.3,
   },
@@ -302,12 +303,13 @@ const styles = StyleSheet.create({
   },
   playlistTitle: {
     fontSize: 17,
-    fontWeight: '400',
+    fontFamily: FONTS.display,
     color: COLORS.text,
     letterSpacing: 0.2,
   },
   playlistMeta: {
     fontSize: 11,
+    fontFamily: FONTS.mono,
     letterSpacing: 0.5,
     color: COLORS.textMuted,
     marginTop: 7,
@@ -329,7 +331,7 @@ const styles = StyleSheet.create({
   exportText: {
     color: COLORS.spotifyInk,
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: FONTS.bodyBold,
   },
   exportDoneText: {
     color: COLORS.text,
@@ -369,12 +371,13 @@ const styles = StyleSheet.create({
   },
   trackName: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: FONTS.bodySemiBold,
     color: COLORS.text,
     marginBottom: 1,
   },
   trackArtist: {
     fontSize: 12.5,
+    fontFamily: FONTS.body,
     color: COLORS.textMuted,
   },
   eqBars: {

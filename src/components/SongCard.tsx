@@ -10,7 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Track } from '../types';
-import { COLORS, SPACING, RADII } from '../constants/theme';
+import { COLORS, SPACING, RADII, FONTS } from '../constants/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = Math.min(SCREEN_WIDTH * 0.9, 380);
@@ -195,14 +195,14 @@ const styles = StyleSheet.create({
   },
   songTitle: {
     fontSize: 23,
-    fontWeight: '400',
+    fontFamily: FONTS.display,
     color: COLORS.text,
     marginBottom: SPACING.xs,
     letterSpacing: 0.2,
   },
   artistName: {
     fontSize: 14.5,
-    fontWeight: '500',
+    fontFamily: FONTS.bodyMedium,
     color: 'rgba(255,255,255,0.82)',
     marginBottom: 2,
   },
@@ -231,6 +231,7 @@ const styles = StyleSheet.create({
   playerLabel: {
     flex: 1,
     fontSize: 11,
+    fontFamily: FONTS.mono,
     letterSpacing: 0.8,
     color: COLORS.textSecondary,
     textTransform: 'uppercase',

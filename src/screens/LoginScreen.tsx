@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import { COLORS, SPACING, RADII } from '../constants/theme';
+import { COLORS, SPACING, RADII, FONTS } from '../constants/theme';
 import {
   createAuthRequest,
   exchangeCode,
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     fontSize: 34,
-    fontWeight: '400',
+    fontFamily: FONTS.display,
     color: COLORS.text,
     letterSpacing: 0.3,
     marginBottom: 18,
@@ -136,6 +136,7 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontSize: 17,
+    fontFamily: FONTS.body,
     lineHeight: 26,
     color: COLORS.textSecondary,
     textAlign: 'center',
@@ -168,11 +169,12 @@ const styles = StyleSheet.create({
   buttonText: {
     color: COLORS.spotifyInk,
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: FONTS.bodyBold,
   },
   disclaimer: {
     color: COLORS.textMuted,
     fontSize: 12,
+    fontFamily: FONTS.body,
     textAlign: 'center',
     lineHeight: 18,
   },

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Track } from '../types';
-import { COLORS, RADII } from '../constants/theme';
+import { COLORS, RADII, FONTS } from '../constants/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = Math.min(SCREEN_WIDTH * 0.9, 380);
@@ -156,12 +156,14 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 11,
+    fontFamily: FONTS.mono,
     letterSpacing: 0.6,
     color: COLORS.textSecondary,
     textTransform: 'uppercase',
   },
   duration: {
     fontSize: 11,
+    fontFamily: FONTS.mono,
     letterSpacing: 0.4,
     color: COLORS.textMuted,
   },

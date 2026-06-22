@@ -10,7 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { clearSession } from '../services/spotify';
 import { useStore } from '../store/useStore';
-import { COLORS, SPACING, RADII } from '../constants/theme';
+import { COLORS, SPACING, RADII, FONTS } from '../constants/theme';
 
 interface SettingsModalProps {
   visible: boolean;
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: '400',
+    fontFamily: FONTS.display,
     color: COLORS.text,
     letterSpacing: 0.2,
   },

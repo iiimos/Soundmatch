@@ -51,8 +51,13 @@ export const RADII = {
 };
 
 export const FONTS = {
-  regular: 'System',
-  bold: 'System',
+  display: 'Michroma_400Regular',
+  body: 'HankenGrotesk_400Regular',
+  bodyMedium: 'HankenGrotesk_500Medium',
+  bodySemiBold: 'HankenGrotesk_600SemiBold',
+  bodyBold: 'HankenGrotesk_700Bold',
+  mono: 'SpaceMono_400Regular',
+  monoBold: 'SpaceMono_700Bold',
 };
 
 export const SPACING = {

@@ -19,7 +19,7 @@ import {
   parsePlaylistId,
 } from '../services/spotify';
 import SettingsModal from '../components/SettingsModal';
-import { COLORS, SPACING, RADII } from '../constants/theme';
+import { COLORS, SPACING, RADII, FONTS } from '../constants/theme';
 
 export default function ProfileScreen() {
   const userProfile = useStore((s) => s.userProfile);
@@ -372,13 +372,14 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: 10.5,
+    fontFamily: FONTS.mono,
     letterSpacing: 2.2,
     color: COLORS.textMuted,
     marginBottom: 7,
   },
   title: {
     fontSize: 26,
-    fontWeight: '400',
+    fontFamily: FONTS.display,
     color: COLORS.text,
     letterSpacing: 0.3,
   },
@@ -449,12 +450,13 @@ const styles = StyleSheet.create({
   },
   statBig: {
     fontSize: 25,
-    fontWeight: '400',
+    fontFamily: FONTS.display,
     color: COLORS.text,
     letterSpacing: 0.2,
   },
   statLabel: {
     fontSize: 10,
+    fontFamily: FONTS.mono,
     letterSpacing: 1.2,
     color: COLORS.textMuted,
     marginTop: 9,
@@ -470,6 +472,7 @@ const styles = StyleSheet.create({
   },
   cardEyebrow: {
     fontSize: 10.5,
+    fontFamily: FONTS.mono,
     letterSpacing: 2.2,
     color: COLORS.textMuted,
     marginBottom: 16,
@@ -524,6 +527,7 @@ const styles = StyleSheet.create({
   },
   sectionEyebrow: {
     fontSize: 10.5,
+    fontFamily: FONTS.mono,
     letterSpacing: 2.2,
     color: COLORS.textMuted,
     marginBottom: 10,
@@ -623,6 +627,7 @@ const styles = StyleSheet.create({
   },
   linkedBadge: {
     fontSize: 11,
+    fontFamily: FONTS.mono,
     letterSpacing: 0.8,
     color: COLORS.spotify,
   },
