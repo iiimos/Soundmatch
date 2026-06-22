@@ -27,7 +27,7 @@ const DISCOVERY = {
 };
 
 const REDIRECT_URI = Platform.OS === 'web'
-  ? 'https://dirty-ads-happen.loca.lt'
+  ? 'https://eleven-pears-guess.loca.lt'
   : makeRedirectUri({ scheme: 'soundmatch', path: 'spotify-auth-callback' });
 
 const SCOPES = [
