@@ -4,28 +4,32 @@ import { Ionicons } from '@expo/vector-icons';
 import DiscoverScreen from '../screens/DiscoverScreen';
 import LibraryScreen from '../screens/LibraryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import { useStore } from '../store/useStore';
 import { COLORS } from '../constants/theme';
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
+  const likedCount = useStore((s) => s.likedTracks.length);
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
           backgroundColor: COLORS.surface,
-          borderTopColor: COLORS.border,
+          borderTopColor: COLORS.line,
           borderTopWidth: 1,
           height: 85,
           paddingBottom: 25,
           paddingTop: 10,
         },
-        tabBarActiveTintColor: COLORS.primary,
+        tabBarActiveTintColor: COLORS.accent,
         tabBarInactiveTintColor: COLORS.textMuted,
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10.5,
           fontWeight: '600',
+          letterSpacing: 0.3,
         },
       }}
     >
@@ -39,12 +43,19 @@ export default function TabNavigator() {
         }}
       />
       <Tab.Screen
-        name="Library"
+        name="Liked"
         component={LibraryScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="musical-notes" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'heart' : 'heart-outline'} size={24} color={color} />
           ),
+          tabBarBadge: likedCount > 0 ? likedCount : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: COLORS.accent,
+            color: COLORS.accentInk,
+            fontSize: 10,
+            fontWeight: '700',
+          },
         }}
       />
       <Tab.Screen

@@ -10,7 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { clearSession } from '../services/spotify';
 import { useStore } from '../store/useStore';
-import { COLORS, SPACING } from '../constants/theme';
+import { COLORS, SPACING, RADII } from '../constants/theme';
 
 interface SettingsModalProps {
   visible: boolean;
@@ -45,27 +45,33 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
         <View style={styles.sheet}>
           <View style={styles.headerRow}>
             <Text style={styles.title}>Settings</Text>
-            <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
-              <Ionicons name="close" size={24} color={COLORS.text} />
+            <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
+              <Ionicons name="close" size={17} color={COLORS.textSecondary} />
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity style={styles.row} onPress={handleClearCache} activeOpacity={0.7}>
-            <Ionicons name="trash-outline" size={22} color={COLORS.text} />
+            <View style={styles.rowIcon}>
+              <Ionicons name="trash-outline" size={17} color={COLORS.accent} />
+            </View>
             <View style={styles.rowText}>
               <Text style={styles.rowTitle}>Clear Cache</Text>
               <Text style={styles.rowDesc}>Reset recommendation stack</Text>
             </View>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
 
           <TouchableOpacity style={styles.row} onPress={handleLogout} activeOpacity={0.7}>
-            <Ionicons name="log-out-outline" size={22} color={COLORS.dislike} />
+            <View style={[styles.rowIcon, { backgroundColor: 'rgba(235, 66, 77, 0.14)' }]}>
+              <Ionicons name="log-out-outline" size={17} color={COLORS.dislike} />
+            </View>
             <View style={styles.rowText}>
-              <Text style={[styles.rowTitle, { color: COLORS.dislike }]}>Log Out</Text>
+              <Text style={[styles.rowTitle, { color: COLORS.dislike }]}>Sign Out</Text>
               <Text style={styles.rowDesc}>Disconnect your Spotify account</Text>
             </View>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
           </TouchableOpacity>
         </View>
       </View>
@@ -76,17 +82,19 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: COLORS.overlay,
+    backgroundColor: 'rgba(6, 4, 10, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: SPACING.lg,
   },
   sheet: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 20,
+    backgroundColor: COLORS.surfaceElevated,
+    borderRadius: RADII.lg,
     padding: SPACING.lg,
     width: '100%',
     maxWidth: 400,
+    borderWidth: 1,
+    borderColor: COLORS.line,
   },
   headerRow: {
     flexDirection: 'row',
@@ -96,30 +104,49 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: '400',
     color: COLORS.text,
+    letterSpacing: 0.2,
+  },
+  closeBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: COLORS.line,
+    backgroundColor: COLORS.surfaceHover,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: SPACING.md,
-    gap: SPACING.md,
+    paddingVertical: 13,
+    gap: 13,
+  },
+  rowIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    backgroundColor: COLORS.accentSoft,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   rowText: {
     flex: 1,
   },
   rowTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 14.5,
+    fontWeight: '500',
     color: COLORS.text,
-    marginBottom: 2,
+    marginBottom: 1,
   },
   rowDesc: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
+    fontSize: 12,
+    color: COLORS.textMuted,
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: COLORS.line,
   },
 });

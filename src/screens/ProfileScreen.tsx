@@ -9,7 +9,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../store/useStore';
@@ -20,7 +19,7 @@ import {
   parsePlaylistId,
 } from '../services/spotify';
 import SettingsModal from '../components/SettingsModal';
-import { COLORS, SPACING } from '../constants/theme';
+import { COLORS, SPACING, RADII } from '../constants/theme';
 
 export default function ProfileScreen() {
   const userProfile = useStore((s) => s.userProfile);
@@ -31,6 +30,7 @@ export default function ProfileScreen() {
   const setTastePlaylistUrl = useStore((s) => s.setTastePlaylistUrl);
   const setTasteSeeds = useStore((s) => s.setTasteSeeds);
 
+  const [tab, setTab] = useState<'stats' | 'settings'>('stats');
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [topGenres, setTopGenres] = useState<{ genre: string; count: number }[]>([]);
   const [loadingGenres, setLoadingGenres] = useState(false);
@@ -44,7 +44,6 @@ export default function ProfileScreen() {
   const totalDisliked = dislikedTrackIds.length;
   const totalSwipes = totalLiked + totalDisliked;
   const matchRate = totalSwipes > 0 ? Math.round((totalLiked / totalSwipes) * 100) : 0;
-  const recentlyLiked = likedTracks.slice(0, 5);
 
   useEffect(() => {
     calculateTopGenres();
@@ -62,21 +61,9 @@ export default function ProfileScreen() {
 
     setLoadingGenres(true);
     try {
-      const artistIds: string[] = [];
-      for (const track of likedTracks) {
-        if (track.uri) {
-          const trackArtistMatch = track.artist;
-          if (trackArtistMatch) {
-            // We need artist IDs — extract from the track data via API
-          }
-        }
-      }
-
-      // Fetch track details to get artist IDs, then batch fetch artists
       const trackIds = likedTracks.map((t) => t.id);
       const uniqueArtistIds: string[] = [];
 
-      // Use the apiFetch to get tracks with artist IDs
       const { apiFetch } = await import('../services/spotify');
       for (let i = 0; i < trackIds.length; i += 50) {
         const batch = trackIds.slice(i, i + 50);
@@ -110,7 +97,6 @@ export default function ProfileScreen() {
 
       setTopGenres(sorted);
     } catch {
-      // Silently fail — genres are non-critical
     } finally {
       setLoadingGenres(false);
     }
@@ -125,9 +111,7 @@ export default function ProfileScreen() {
 
   const toggleGenre = (genre: string) => {
     setSelectedGenres((prev) => {
-      if (prev.includes(genre)) {
-        return prev.filter((g) => g !== genre);
-      }
+      if (prev.includes(genre)) return prev.filter((g) => g !== genre);
       if (prev.length >= 5) {
         Alert.alert('Limit Reached', 'You can select up to 5 genres.');
         return prev;
@@ -156,12 +140,10 @@ export default function ProfileScreen() {
     try {
       setTastePlaylistUrl(playlistInput);
       const { trackIds, artistIds } = await fetchPlaylistTracks(playlistId);
-
       if (trackIds.length === 0 && artistIds.length === 0) {
         Alert.alert('Empty Playlist', 'This playlist has no tracks to seed from.');
         return;
       }
-
       setTasteSeeds(trackIds, artistIds);
       Alert.alert('Taste Updated', 'Recommendations will now be based on this playlist.');
     } catch (e: unknown) {
@@ -174,171 +156,202 @@ export default function ProfileScreen() {
   const displayedGenres = showAllGenres ? availableGenres : availableGenres.slice(0, 20);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <View style={styles.container}>
       {/* Header */}
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>Profile</Text>
-        <TouchableOpacity onPress={() => setSettingsVisible(true)} activeOpacity={0.7}>
-          <Ionicons name="settings-outline" size={24} color={COLORS.textSecondary} />
-        </TouchableOpacity>
-      </View>
-
-      {/* User Info */}
-      <View style={styles.userSection}>
-        {userProfile?.imageUrl ? (
-          <Image source={{ uri: userProfile.imageUrl }} style={styles.avatar} />
-        ) : (
-          <View style={[styles.avatar, styles.avatarPlaceholder]}>
-            <Ionicons name="person" size={36} color={COLORS.textMuted} />
+      <View style={styles.headerSection}>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.eyebrow}>
+              {userProfile?.displayName ?? 'User'} · Member since 2026
+            </Text>
+            <Text style={styles.title}>Profile</Text>
           </View>
-        )}
-        <View style={styles.userText}>
-          <Text style={styles.userName}>{userProfile?.displayName ?? 'User'}</Text>
-          <Text style={styles.userEmail}>{userProfile?.email ?? ''}</Text>
-        </View>
-      </View>
-
-      {/* Stats */}
-      <View style={styles.statsRow}>
-        <View style={styles.statBox}>
-          <Text style={styles.statValue}>{totalLiked}</Text>
-          <Text style={styles.statLabel}>Liked</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statBox}>
-          <Text style={styles.statValue}>{totalDisliked}</Text>
-          <Text style={styles.statLabel}>Passed</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statBox}>
-          <Text style={[styles.statValue, { color: matchRate >= 50 ? COLORS.primary : COLORS.accent }]}>
-            {matchRate}%
-          </Text>
-          <Text style={styles.statLabel}>Match Rate</Text>
-        </View>
-      </View>
-
-      {/* Recently Liked */}
-      {recentlyLiked.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recently Liked</Text>
-          <FlatList
-            horizontal
-            data={recentlyLiked}
-            keyExtractor={(item) => item.id}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.recentList}
-            renderItem={({ item }) => (
-              <View style={styles.recentItem}>
-                <Image source={{ uri: item.albumCover }} style={styles.recentCover} />
-                <Text style={styles.recentName} numberOfLines={1}>{item.name}</Text>
-                <Text style={styles.recentArtist} numberOfLines={1}>{item.artist}</Text>
+          <View style={styles.avatarContainer}>
+            {userProfile?.imageUrl ? (
+              <Image source={{ uri: userProfile.imageUrl }} style={styles.avatar} />
+            ) : (
+              <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                <Text style={styles.avatarLetter}>
+                  {(userProfile?.displayName ?? 'U')[0].toUpperCase()}
+                </Text>
               </View>
             )}
-          />
-        </View>
-      )}
-
-      {/* Top Genres */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Top Genres</Text>
-        {loadingGenres ? (
-          <ActivityIndicator color={COLORS.primary} style={styles.genreLoader} />
-        ) : topGenres.length > 0 ? (
-          <View style={styles.topGenreList}>
-            {topGenres.map((item, index) => {
-              const maxCount = topGenres[0].count;
-              const barWidth = maxCount > 0 ? (item.count / maxCount) * 100 : 0;
-              return (
-                <View key={item.genre} style={styles.topGenreRow}>
-                  <Text style={styles.topGenreRank}>{index + 1}</Text>
-                  <View style={styles.topGenreBarContainer}>
-                    <View style={[styles.topGenreBar, { width: `${barWidth}%` }]} />
-                    <Text style={styles.topGenreName}>{item.genre}</Text>
-                  </View>
-                  <Text style={styles.topGenreCount}>{item.count}</Text>
-                </View>
-              );
-            })}
           </View>
-        ) : (
-          <Text style={styles.emptyHint}>
-            Like some songs to see your top genres
-          </Text>
-        )}
-      </View>
-
-      {/* Taste Profile — Genre Mode */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Taste Profile</Text>
-        <Text style={styles.sectionDesc}>Select up to 5 genres to tune your recommendations</Text>
-
-        <View style={styles.chipContainer}>
-          {displayedGenres.map((genre) => {
-            const isSelected = selectedGenres.includes(genre);
-            return (
-              <TouchableOpacity
-                key={genre}
-                style={[styles.chip, isSelected && styles.chipSelected]}
-                onPress={() => toggleGenre(genre)}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
-                  {genre}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
         </View>
+      </View>
 
-        {availableGenres.length > 20 && (
-          <TouchableOpacity onPress={() => setShowAllGenres(!showAllGenres)} activeOpacity={0.7}>
-            <Text style={styles.showMoreText}>
-              {showAllGenres ? 'Show Less' : `Show All (${availableGenres.length})`}
-            </Text>
-          </TouchableOpacity>
+      {/* Segmented control */}
+      <View style={styles.segmentedContainer}>
+        <View style={styles.segmented}>
+          {(['stats', 'settings'] as const).map((t) => (
+            <TouchableOpacity
+              key={t}
+              style={[styles.segmentBtn, tab === t && styles.segmentBtnActive]}
+              onPress={() => setTab(t)}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.segmentText, tab === t && styles.segmentTextActive]}>
+                {t.charAt(0).toUpperCase() + t.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {tab === 'stats' ? (
+          <>
+            {/* KPI tiles */}
+            <View style={styles.statsGrid}>
+              <View style={styles.statTile}>
+                <Text style={styles.statBig}>{totalLiked}</Text>
+                <Text style={styles.statLabel}>TRACKS LIKED</Text>
+              </View>
+              <View style={styles.statTile}>
+                <Text style={styles.statBig}>{matchRate}%</Text>
+                <Text style={styles.statLabel}>LIKE RATE</Text>
+              </View>
+              <View style={styles.statTile}>
+                <Text style={styles.statBig}>{totalSwipes}</Text>
+                <Text style={styles.statLabel}>TOTAL SWIPES</Text>
+              </View>
+              <View style={styles.statTile}>
+                <Text style={styles.statBig}>{totalDisliked}</Text>
+                <Text style={styles.statLabel}>PASSED</Text>
+              </View>
+            </View>
+
+            {/* Top Genres */}
+            <View style={styles.card}>
+              <Text style={styles.cardEyebrow}>YOUR TOP GENRES</Text>
+              {loadingGenres ? (
+                <ActivityIndicator color={COLORS.accent} style={{ marginVertical: 20 }} />
+              ) : topGenres.length > 0 ? (
+                topGenres.map((g) => {
+                  const maxCount = topGenres[0].count;
+                  const pct = maxCount > 0 ? (g.count / maxCount) * 100 : 0;
+                  return (
+                    <View key={g.genre} style={styles.genreRow}>
+                      <View style={styles.genreInfo}>
+                        <Text style={styles.genreName}>{g.genre}</Text>
+                        <Text style={styles.genrePct}>{Math.round(pct)}%</Text>
+                      </View>
+                      <View style={styles.genreBarBg}>
+                        <View style={[styles.genreBarFill, { width: `${pct}%` }]} />
+                      </View>
+                    </View>
+                  );
+                })
+              ) : (
+                <Text style={styles.emptyHint}>Like some songs to see your top genres</Text>
+              )}
+            </View>
+          </>
+        ) : (
+          <>
+            {/* Taste section */}
+            <Text style={styles.sectionEyebrow}>TASTE</Text>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Genres & moods</Text>
+              <Text style={styles.cardDesc}>Select up to 5 genres to tune your recommendations</Text>
+
+              <View style={styles.chipContainer}>
+                {displayedGenres.map((genre) => {
+                  const isSelected = selectedGenres.includes(genre);
+                  return (
+                    <TouchableOpacity
+                      key={genre}
+                      style={[styles.chip, isSelected && styles.chipSelected]}
+                      onPress={() => toggleGenre(genre)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                        {genre}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {availableGenres.length > 20 && (
+                <TouchableOpacity onPress={() => setShowAllGenres(!showAllGenres)} activeOpacity={0.7}>
+                  <Text style={styles.showMoreText}>
+                    {showAllGenres ? 'Show Less' : `Show All (${availableGenres.length})`}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity style={styles.accentBtn} onPress={applyGenres} activeOpacity={0.8}>
+                <Text style={styles.accentBtnText}>Apply Genre Seeds</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Reference Playlist */}
+            <Text style={styles.sectionEyebrow}>REFERENCE PLAYLIST</Text>
+            <View style={styles.card}>
+              <Text style={styles.cardDesc}>
+                Paste a Spotify playlist link to seed recommendations from its tracks
+              </Text>
+
+              <TextInput
+                style={styles.input}
+                placeholder="https://open.spotify.com/playlist/..."
+                placeholderTextColor={COLORS.textMuted}
+                value={playlistInput}
+                onChangeText={setPlaylistInput}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+
+              <TouchableOpacity
+                style={[styles.outlineBtn, loadingPlaylist && styles.btnDisabled]}
+                onPress={applyPlaylist}
+                disabled={loadingPlaylist}
+                activeOpacity={0.8}
+              >
+                {loadingPlaylist ? (
+                  <ActivityIndicator color={COLORS.accent} size="small" />
+                ) : (
+                  <Text style={styles.outlineBtnText}>Apply Playlist Seeds</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* Connections */}
+            <Text style={styles.sectionEyebrow}>CONNECTIONS</Text>
+            <View style={styles.card}>
+              <View style={styles.settingsRow}>
+                <View style={styles.settingsIcon}>
+                  <Ionicons name="musical-note" size={17} color={COLORS.accent} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.settingsLabel}>Spotify</Text>
+                  <Text style={styles.settingsDetail}>Connected · {userProfile?.displayName ?? ''}</Text>
+                </View>
+                <Text style={styles.linkedBadge}>LINKED</Text>
+              </View>
+            </View>
+
+            {/* Sign out */}
+            <TouchableOpacity
+              style={styles.signOutBtn}
+              onPress={() => setSettingsVisible(true)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.signOutText}>Sign out</Text>
+            </TouchableOpacity>
+          </>
         )}
 
-        <TouchableOpacity style={styles.applyButton} onPress={applyGenres} activeOpacity={0.8}>
-          <Text style={styles.applyText}>Apply Genre Seeds</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Taste Profile — Playlist Mode */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Reference Playlist</Text>
-        <Text style={styles.sectionDesc}>
-          Paste a Spotify playlist link to seed recommendations from its tracks
-        </Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="https://open.spotify.com/playlist/..."
-          placeholderTextColor={COLORS.textMuted}
-          value={playlistInput}
-          onChangeText={setPlaylistInput}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-
-        <TouchableOpacity
-          style={[styles.applyButton, styles.applyButtonSecondary, loadingPlaylist && styles.applyButtonDisabled]}
-          onPress={applyPlaylist}
-          disabled={loadingPlaylist}
-          activeOpacity={0.8}
-        >
-          {loadingPlaylist ? (
-            <ActivityIndicator color={COLORS.primary} size="small" />
-          ) : (
-            <Text style={styles.applyTextSecondary}>Apply Playlist Seeds</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.bottomPad} />
+        <View style={{ height: 40 }} />
+      </ScrollView>
 
       <SettingsModal visible={settingsVisible} onClose={() => setSettingsVisible(false)} />
-    </ScrollView>
+    </View>
   );
 }
 
@@ -347,161 +360,160 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  content: {
-    paddingTop: 60,
-    paddingHorizontal: SPACING.md,
+  headerSection: {
+    paddingTop: 56,
+    paddingHorizontal: 18,
+    paddingBottom: 8,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
+    alignItems: 'flex-end',
+  },
+  eyebrow: {
+    fontSize: 10.5,
+    letterSpacing: 2.2,
+    color: COLORS.textMuted,
+    marginBottom: 7,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '400',
     color: COLORS.text,
+    letterSpacing: 0.3,
   },
-  userSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
-  },
+  avatarContainer: {},
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    marginRight: SPACING.md,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
   },
   avatarPlaceholder: {
-    backgroundColor: COLORS.card,
+    backgroundColor: COLORS.accent,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  userText: {
-    flex: 1,
+  avatarLetter: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: COLORS.accentInk,
   },
-  userName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: 2,
+  segmentedContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-  userEmail: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
-  statsRow: {
+  segmented: {
     flexDirection: 'row',
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: SPACING.lg,
-    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.line,
+    borderRadius: 12,
+    padding: 4,
+    gap: 4,
   },
-  statBox: {
+  segmentBtn: {
     flex: 1,
+    borderRadius: 9,
+    paddingVertical: 9,
     alignItems: 'center',
   },
-  statDivider: {
-    width: 1,
-    backgroundColor: COLORS.border,
+  segmentBtnActive: {
+    backgroundColor: COLORS.surfaceHover,
   },
-  statValue: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: COLORS.primary,
-    marginBottom: SPACING.xs,
+  segmentText: {
+    fontSize: 13.5,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+  },
+  segmentTextActive: {
+    color: COLORS.text,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 11,
+    marginBottom: 18,
+  },
+  statTile: {
+    width: '48%',
+    flexGrow: 1,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.line,
+    borderRadius: RADII.md,
+    padding: 16,
+  },
+  statBig: {
+    fontSize: 25,
+    fontWeight: '400',
+    color: COLORS.text,
+    letterSpacing: 0.2,
   },
   statLabel: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
-  },
-  section: {
-    marginBottom: SPACING.lg,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  sectionDesc: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.md,
-    lineHeight: 18,
-  },
-  recentList: {
-    gap: SPACING.md,
-  },
-  recentItem: {
-    width: 110,
-  },
-  recentCover: {
-    width: 110,
-    height: 110,
-    borderRadius: 12,
-    backgroundColor: COLORS.card,
-    marginBottom: SPACING.sm,
-  },
-  recentName: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 2,
-  },
-  recentArtist: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-  },
-  genreLoader: {
-    marginVertical: SPACING.lg,
-  },
-  topGenreList: {
-    gap: SPACING.sm,
-  },
-  topGenreRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  topGenreRank: {
-    width: 20,
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 10,
+    letterSpacing: 1.2,
     color: COLORS.textMuted,
-    textAlign: 'center',
+    marginTop: 9,
+    textTransform: 'uppercase',
   },
-  topGenreBarContainer: {
-    flex: 1,
-    height: 32,
+  card: {
     backgroundColor: COLORS.surface,
-    borderRadius: 8,
-    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.line,
+    borderRadius: RADII.md,
+    padding: 18,
+    marginBottom: 18,
+  },
+  cardEyebrow: {
+    fontSize: 10.5,
+    letterSpacing: 2.2,
+    color: COLORS.textMuted,
+    marginBottom: 16,
+  },
+  cardTitle: {
+    fontSize: 14.5,
+    fontWeight: '500',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  cardDesc: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  genreRow: {
+    marginBottom: 14,
+  },
+  genreInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 7,
+    gap: 10,
+  },
+  genreName: {
+    fontSize: 13.5,
+    fontWeight: '500',
+    color: COLORS.text,
+  },
+  genrePct: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    letterSpacing: 0.5,
+  },
+  genreBarBg: {
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: COLORS.surfaceHover,
     overflow: 'hidden',
   },
-  topGenreBar: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    backgroundColor: COLORS.primaryDark,
-    borderRadius: 8,
-    opacity: 0.3,
-  },
-  topGenreName: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.text,
-    paddingHorizontal: SPACING.sm,
-  },
-  topGenreCount: {
-    width: 28,
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-    textAlign: 'right',
+  genreBarFill: {
+    height: '100%',
+    borderRadius: 4,
+    backgroundColor: COLORS.accent,
   },
   emptyHint: {
     fontSize: 14,
@@ -509,74 +521,121 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     paddingVertical: SPACING.md,
   },
+  sectionEyebrow: {
+    fontSize: 10.5,
+    letterSpacing: 2.2,
+    color: COLORS.textMuted,
+    marginBottom: 10,
+    marginLeft: 4,
+  },
   chipContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.sm,
+    gap: 10,
     marginBottom: SPACING.md,
   },
   chip: {
-    backgroundColor: COLORS.surface,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+    borderRadius: RADII.pill,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.lineStrong,
+    backgroundColor: COLORS.surface,
   },
   chipSelected: {
-    backgroundColor: COLORS.primaryDark,
-    borderColor: COLORS.primary,
+    backgroundColor: COLORS.accentSoft,
+    borderColor: COLORS.accentLine,
   },
   chipText: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
+    fontSize: 14,
     fontWeight: '500',
+    color: COLORS.textSecondary,
   },
   chipTextSelected: {
-    color: COLORS.text,
+    color: COLORS.accent,
   },
   showMoreText: {
     fontSize: 14,
-    color: COLORS.primary,
+    color: COLORS.accent,
     fontWeight: '600',
     marginBottom: SPACING.md,
   },
-  applyButton: {
-    backgroundColor: COLORS.primary,
+  accentBtn: {
+    backgroundColor: COLORS.accent,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: 'center',
   },
-  applyButtonSecondary: {
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderColor: COLORS.primary,
+  accentBtnText: {
+    color: COLORS.accentInk,
+    fontSize: 15,
+    fontWeight: '700',
   },
-  applyButtonDisabled: {
+  outlineBtn: {
+    borderWidth: 1.5,
+    borderColor: COLORS.accent,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  outlineBtnText: {
+    color: COLORS.accent,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  btnDisabled: {
     opacity: 0.6,
   },
-  applyText: {
-    color: COLORS.text,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  applyTextSecondary: {
-    color: COLORS.primary,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
   input: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.surfaceElevated,
     borderRadius: 12,
     paddingHorizontal: SPACING.md,
     paddingVertical: 14,
     fontSize: 14,
     color: COLORS.text,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.line,
     marginBottom: SPACING.md,
   },
-  bottomPad: {
-    height: 40,
+  settingsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 13,
+  },
+  settingsIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    backgroundColor: COLORS.accentSoft,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  settingsLabel: {
+    fontSize: 14.5,
+    fontWeight: '500',
+    color: COLORS.text,
+  },
+  settingsDetail: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginTop: 1,
+  },
+  linkedBadge: {
+    fontSize: 11,
+    letterSpacing: 0.8,
+    color: COLORS.spotify,
+  },
+  signOutBtn: {
+    borderWidth: 1,
+    borderColor: COLORS.lineStrong,
+    borderRadius: 14,
+    padding: 14,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  signOutText: {
+    fontSize: 14.5,
+    fontWeight: '600',
+    color: COLORS.dislike,
   },
 });

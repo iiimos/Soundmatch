@@ -14,13 +14,13 @@ import { createAudioPlayer, setAudioModeAsync, AudioPlayer } from 'expo-audio';
 import { useStore } from '../store/useStore';
 import { exportToSpotify } from '../services/spotify';
 import { Track } from '../types';
-import { COLORS, SPACING } from '../constants/theme';
+import { COLORS, SPACING, RADII } from '../constants/theme';
 
 export default function LibraryScreen() {
   const likedTracks = useStore((s) => s.likedTracks);
   const removeLikedTrack = useStore((s) => s.removeLikedTrack);
   const [playingId, setPlayingId] = useState<string | null>(null);
-  const [exporting, setExporting] = useState(false);
+  const [exportState, setExportState] = useState<'idle' | 'working' | 'done'>('idle');
   const playerRef = useRef<AudioPlayer | null>(null);
 
   const stopAudio = useCallback(async () => {
@@ -63,24 +63,17 @@ export default function LibraryScreen() {
   );
 
   const handleExport = useCallback(async () => {
-    if (likedTracks.length === 0) {
-      Alert.alert('Nothing to export', 'Like some songs first by swiping right in Discover.');
-      return;
-    }
+    if (likedTracks.length === 0 || exportState !== 'idle') return;
 
-    setExporting(true);
+    setExportState('working');
     try {
       await exportToSpotify(likedTracks);
-      Alert.alert(
-        'Playlist Created!',
-        `"Soundmatch Discoveries" with ${likedTracks.length} tracks has been added to your Spotify account.`,
-      );
+      setExportState('done');
     } catch (e: unknown) {
+      setExportState('idle');
       Alert.alert('Export Failed', e instanceof Error ? e.message : 'Something went wrong');
-    } finally {
-      setExporting(false);
     }
-  }, [likedTracks]);
+  }, [likedTracks, exportState]);
 
   const handleRemove = useCallback(
     (trackId: string) => {
@@ -108,11 +101,11 @@ export default function LibraryScreen() {
               {hasPreview ? (
                 <Ionicons
                   name={isCurrentlyPlaying ? 'pause' : 'play'}
-                  size={20}
+                  size={16}
                   color={COLORS.text}
                 />
               ) : (
-                <Ionicons name="volume-mute" size={16} color={COLORS.textMuted} />
+                <Ionicons name="volume-mute" size={14} color={COLORS.textMuted} />
               )}
             </View>
           </TouchableOpacity>
@@ -126,31 +119,46 @@ export default function LibraryScreen() {
             </Text>
           </View>
 
+          {isCurrentlyPlaying && (
+            <View style={styles.eqBars}>
+              {[0, 1, 2, 3].map((i) => (
+                <View key={i} style={[styles.eqBar, { height: [8, 13, 6, 11][i] }]} />
+              ))}
+            </View>
+          )}
+
           <TouchableOpacity
-            style={styles.removeButton}
-            onPress={() => handleRemove(item.id)}
+            style={[styles.rowPlayBtn, isCurrentlyPlaying && styles.rowPlayBtnActive]}
+            onPress={() => playTrack(item)}
+            disabled={!hasPreview}
             activeOpacity={0.7}
           >
-            <Ionicons name="close-circle-outline" size={22} color={COLORS.textMuted} />
+            <Ionicons
+              name={isCurrentlyPlaying ? 'pause' : 'play'}
+              size={15}
+              color={isCurrentlyPlaying ? COLORS.accentInk : COLORS.text}
+            />
           </TouchableOpacity>
         </View>
       );
     },
-    [playingId, playTrack, handleRemove],
+    [playingId, playTrack],
   );
 
   if (likedTracks.length === 0) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Library</Text>
+        <View style={styles.headerSection}>
+          <Text style={styles.eyebrow}>YOUR MATCHES</Text>
+          <Text style={styles.title}>Liked</Text>
+        </View>
         <View style={styles.emptyState}>
           <View style={styles.emptyIconContainer}>
-            <Ionicons name="musical-notes-outline" size={64} color={COLORS.textMuted} />
+            <Ionicons name="heart-outline" size={26} color={COLORS.textMuted} />
           </View>
-          <Text style={styles.emptyTitle}>Your library is empty</Text>
+          <Text style={styles.emptyTitle}>No likes yet</Text>
           <Text style={styles.emptyHint}>
-            Head to the Discover tab and swipe right on songs you love. They'll appear here
-            instantly.
+            Swipe right on Discover and your matches land here.
           </Text>
         </View>
       </View>
@@ -159,27 +167,61 @@ export default function LibraryScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Library</Text>
-          <Text style={styles.trackCount}>
-            {likedTracks.length} {likedTracks.length === 1 ? 'track' : 'tracks'}
-          </Text>
+      <View style={styles.headerSection}>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.eyebrow}>{likedTracks.length} TRACKS YOU FELL FOR</Text>
+            <Text style={styles.title}>Liked</Text>
+          </View>
+          <TouchableOpacity style={styles.shuffleBtn} activeOpacity={0.7}>
+            <Ionicons name="sparkles-outline" size={19} color={COLORS.textSecondary} />
+          </TouchableOpacity>
         </View>
       </View>
 
+      {/* Playlist header card */}
+      <View style={styles.playlistCard}>
+        <View style={styles.coverStack}>
+          {likedTracks.slice(0, 4).map((t, i) => (
+            <Image
+              key={t.id}
+              source={{ uri: t.albumCover }}
+              style={[styles.stackCover, { top: i * 4, left: i * 4, zIndex: 4 - i }]}
+            />
+          ))}
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.playlistTitle}>Your SoundMatch Mix</Text>
+          <Text style={styles.playlistMeta}>{likedTracks.length} TRACKS</Text>
+        </View>
+      </View>
+
+      {/* Export button */}
       <TouchableOpacity
-        style={[styles.exportButton, exporting && styles.exportButtonDisabled]}
+        style={[
+          styles.exportButton,
+          exportState === 'done' && styles.exportDone,
+        ]}
         onPress={handleExport}
-        disabled={exporting}
+        disabled={exportState !== 'idle'}
         activeOpacity={0.8}
       >
-        {exporting ? (
-          <ActivityIndicator color={COLORS.text} size="small" />
-        ) : (
+        {exportState === 'idle' && (
           <>
-            <Ionicons name="share-outline" size={20} color={COLORS.text} />
+            <Ionicons name="musical-note" size={19} color={COLORS.spotifyInk} />
             <Text style={styles.exportText}>Export to Spotify</Text>
+          </>
+        )}
+        {exportState === 'working' && (
+          <>
+            <ActivityIndicator color={COLORS.spotifyInk} size="small" />
+            <Text style={styles.exportText}>Creating playlist…</Text>
+          </>
+        )}
+        {exportState === 'done' && (
+          <>
+            <Ionicons name="checkmark" size={18} color={COLORS.spotify} />
+            <Text style={styles.exportDoneText}>Saved · {likedTracks.length} tracks in Spotify</Text>
           </>
         )}
       </TouchableOpacity>
@@ -200,94 +242,170 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    paddingTop: 60,
+    paddingTop: 56,
   },
-  header: {
+  headerSection: {
+    paddingHorizontal: 18,
+    paddingBottom: 10,
+  },
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingHorizontal: SPACING.md,
-    marginBottom: SPACING.sm,
+    alignItems: 'flex-end',
+  },
+  eyebrow: {
+    fontSize: 10.5,
+    letterSpacing: 2.2,
+    color: COLORS.textMuted,
+    marginBottom: 7,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '400',
     color: COLORS.text,
+    letterSpacing: 0.3,
   },
-  trackCount: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginTop: SPACING.xs,
+  shuffleBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1,
+    borderColor: COLORS.lineStrong,
+    backgroundColor: COLORS.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  playlistCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15,
+    marginHorizontal: 16,
+    marginTop: 14,
+    marginBottom: 14,
+    padding: 14,
+    borderRadius: RADII.lg,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.line,
+  },
+  coverStack: {
+    width: 76,
+    height: 76,
+    position: 'relative',
+  },
+  stackCover: {
+    position: 'absolute',
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    backgroundColor: COLORS.surfaceHover,
+  },
+  playlistTitle: {
+    fontSize: 17,
+    fontWeight: '400',
+    color: COLORS.text,
+    letterSpacing: 0.2,
+  },
+  playlistMeta: {
+    fontSize: 11,
+    letterSpacing: 0.5,
+    color: COLORS.textMuted,
+    marginTop: 7,
   },
   exportButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.primary,
-    marginHorizontal: SPACING.md,
-    marginVertical: SPACING.md,
-    paddingVertical: 14,
-    borderRadius: 12,
-    gap: SPACING.sm,
+    backgroundColor: COLORS.spotify,
+    marginHorizontal: 16,
+    marginBottom: 14,
+    paddingVertical: 15,
+    borderRadius: RADII.md,
+    gap: 10,
   },
-  exportButtonDisabled: {
-    opacity: 0.6,
+  exportDone: {
+    backgroundColor: COLORS.surfaceHover,
   },
   exportText: {
+    color: COLORS.spotifyInk,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  exportDoneText: {
     color: COLORS.text,
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: '600',
   },
   list: {
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: 16,
     paddingBottom: SPACING.xl,
   },
   trackRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: SPACING.sm,
+    paddingVertical: 9,
+    gap: 13,
   },
   playButton: {
     position: 'relative',
-    marginRight: SPACING.md,
   },
   thumbnail: {
-    width: 52,
-    height: 52,
-    borderRadius: 8,
-    backgroundColor: COLORS.card,
+    width: 50,
+    height: 50,
+    borderRadius: RADII.sm,
+    backgroundColor: COLORS.surface,
   },
   playOverlay: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.35)',
-    borderRadius: 8,
+    borderRadius: RADII.sm,
     justifyContent: 'center',
     alignItems: 'center',
   },
   trackInfo: {
     flex: 1,
-    marginRight: SPACING.sm,
+    minWidth: 0,
   },
   trackName: {
     fontSize: 15,
     fontWeight: '600',
     color: COLORS.text,
-    marginBottom: 2,
+    marginBottom: 1,
   },
   trackArtist: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
+    fontSize: 12.5,
+    color: COLORS.textMuted,
   },
-  removeButton: {
-    padding: SPACING.sm,
+  eqBars: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 2,
+    height: 13,
+  },
+  eqBar: {
+    width: 2.5,
+    borderRadius: 2,
+    backgroundColor: COLORS.accent,
+  },
+  rowPlayBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: COLORS.surfaceHover,
+    borderWidth: 1,
+    borderColor: COLORS.lineStrong,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rowPlayBtnActive: {
+    backgroundColor: COLORS.accent,
+    borderColor: 'transparent',
   },
   separator: {
     height: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: COLORS.line,
+    marginLeft: 70,
   },
   emptyState: {
     flex: 1,
@@ -296,24 +414,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.xl,
   },
   emptyIconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: COLORS.surface,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: COLORS.surfaceElevated,
+    borderWidth: 1,
+    borderColor: COLORS.line,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.md,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 17,
+    fontWeight: '400',
     color: COLORS.text,
-    marginBottom: SPACING.sm,
+    marginBottom: 7,
+    letterSpacing: 0.2,
   },
   emptyHint: {
-    fontSize: 15,
-    color: COLORS.textSecondary,
+    fontSize: 13.5,
+    color: COLORS.textMuted,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
+    maxWidth: 240,
   },
 });

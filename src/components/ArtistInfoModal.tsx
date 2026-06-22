@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Track } from '../types';
 import { fetchTrackArtistId, fetchArtistDetails } from '../services/spotify';
-import { COLORS, SPACING } from '../constants/theme';
+import { COLORS, SPACING, RADII } from '../constants/theme';
 
 interface ArtistInfoModalProps {
   visible: boolean;
@@ -55,51 +55,75 @@ export default function ArtistInfoModal({ visible, track, onClose }: ArtistInfoM
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
-          <View style={styles.handle} />
+          {/* Grabber */}
+          <View style={styles.grabber} />
 
-          <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.7}>
-            <Ionicons name="close" size={24} color={COLORS.text} />
-          </TouchableOpacity>
+          {/* Header row */}
+          <View style={styles.headerRow}>
+            <Text style={styles.headerEyebrow}>TRACK INFO</Text>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.7}>
+              <Ionicons name="close" size={17} color={COLORS.textSecondary} />
+            </TouchableOpacity>
+          </View>
 
           {loading ? (
-            <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+            <ActivityIndicator size="large" color={COLORS.accent} style={styles.loader} />
           ) : (
             <ScrollView showsVerticalScrollIndicator={false}>
-              <View style={styles.header}>
-                {artistInfo?.imageUrl ? (
-                  <Image source={{ uri: artistInfo.imageUrl }} style={styles.artistImage} />
+              {/* Track header */}
+              <View style={styles.trackHeader}>
+                {track.albumCover ? (
+                  <Image source={{ uri: track.albumCover }} style={styles.coverArt} />
                 ) : (
-                  <View style={[styles.artistImage, styles.artistPlaceholder]}>
-                    <Ionicons name="person" size={40} color={COLORS.textMuted} />
-                  </View>
+                  <View style={[styles.coverArt, styles.coverPlaceholder]} />
                 )}
-                <View style={styles.headerText}>
-                  <Text style={styles.artistName}>{track.artist}</Text>
-                  {artistInfo && (
-                    <Text style={styles.followers}>
-                      {artistInfo.followers.toLocaleString()} followers
-                    </Text>
-                  )}
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.trackTitle}>{track.name}</Text>
+                  <Text style={styles.trackArtist}>{track.artist}</Text>
                 </View>
               </View>
 
-              <View style={styles.trackSection}>
-                <Text style={styles.sectionTitle}>Track</Text>
-                <Text style={styles.trackName}>{track.name}</Text>
-                <Text style={styles.albumLabel}>
-                  from <Text style={styles.albumValue}>{track.albumName}</Text>
-                </Text>
+              {/* Album info */}
+              <View style={styles.detailSection}>
+                <Text style={styles.sectionEyebrow}>RELEASE</Text>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailKey}>ALBUM</Text>
+                  <Text style={styles.detailValue}>{track.albumName}</Text>
+                </View>
               </View>
 
+              {/* Genres */}
               {artistInfo && artistInfo.genres.length > 0 && (
-                <View style={styles.genreSection}>
-                  <Text style={styles.sectionTitle}>Genres</Text>
+                <View style={styles.detailSection}>
+                  <Text style={styles.sectionEyebrow}>GENRE & MOOD</Text>
                   <View style={styles.genreRow}>
-                    {artistInfo.genres.slice(0, 6).map((genre) => (
-                      <View key={genre} style={styles.genreChip}>
-                        <Text style={styles.genreText}>{genre}</Text>
+                    {artistInfo.genres.slice(0, 6).map((genre, i) => (
+                      <View key={genre} style={[styles.genreChip, i === 0 && styles.genreChipAccent]}>
+                        <Text style={[styles.genreText, i === 0 && styles.genreTextAccent]}>{genre}</Text>
                       </View>
                     ))}
+                  </View>
+                </View>
+              )}
+
+              {/* Artist */}
+              {artistInfo && (
+                <View style={styles.detailSection}>
+                  <Text style={styles.sectionEyebrow}>ABOUT THE ARTIST</Text>
+                  <View style={styles.artistRow}>
+                    {artistInfo.imageUrl ? (
+                      <Image source={{ uri: artistInfo.imageUrl }} style={styles.artistImage} />
+                    ) : (
+                      <View style={[styles.artistImage, styles.artistPlaceholder]}>
+                        <Ionicons name="person" size={20} color={COLORS.textMuted} />
+                      </View>
+                    )}
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.artistName}>{track.artist}</Text>
+                      <Text style={styles.followers}>
+                        {artistInfo.followers.toLocaleString()} followers
+                      </Text>
+                    </View>
                   </View>
                 </View>
               )}
@@ -114,108 +138,154 @@ export default function ArtistInfoModal({ visible, track, onClose }: ArtistInfoM
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: COLORS.overlay,
+    backgroundColor: 'rgba(6, 4, 10, 0.6)',
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: COLORS.surface,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.xl,
+    backgroundColor: COLORS.surfaceElevated,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
     minHeight: 350,
-    maxHeight: '70%',
+    maxHeight: '90%',
+    borderTopWidth: 1,
+    borderTopColor: COLORS.lineStrong,
   },
-  handle: {
-    width: 40,
+  grabber: {
+    width: 38,
     height: 4,
-    borderRadius: 2,
-    backgroundColor: COLORS.textMuted,
+    borderRadius: 3,
+    backgroundColor: COLORS.lineStrong,
     alignSelf: 'center',
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.lg,
+    marginTop: 12,
+    marginBottom: 14,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+  headerEyebrow: {
+    fontSize: 10.5,
+    letterSpacing: 2.2,
+    color: COLORS.textMuted,
   },
   closeButton: {
-    position: 'absolute',
-    top: SPACING.md,
-    right: SPACING.md,
-    zIndex: 10,
-    padding: SPACING.xs,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: COLORS.line,
+    backgroundColor: COLORS.surfaceHover,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   loader: {
     marginTop: 80,
   },
-  header: {
+  trackHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: SPACING.lg,
+    gap: 16,
+    marginBottom: 22,
   },
-  artistImage: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    marginRight: SPACING.md,
+  coverArt: {
+    width: 84,
+    height: 84,
+    borderRadius: RADII.md,
   },
-  artistPlaceholder: {
-    backgroundColor: COLORS.card,
-    justifyContent: 'center',
-    alignItems: 'center',
+  coverPlaceholder: {
+    backgroundColor: COLORS.surfaceHover,
   },
-  headerText: {
-    flex: 1,
-  },
-  artistName: {
-    fontSize: 22,
-    fontWeight: 'bold',
+  trackTitle: {
+    fontSize: 21,
+    fontWeight: '400',
     color: COLORS.text,
-    marginBottom: SPACING.xs,
+    letterSpacing: 0.2,
+    lineHeight: 24,
   },
-  followers: {
-    fontSize: 14,
+  trackArtist: {
+    fontSize: 14.5,
+    fontWeight: '500',
     color: COLORS.textSecondary,
+    marginTop: 6,
   },
-  trackSection: {
-    marginBottom: SPACING.lg,
+  detailSection: {
+    marginBottom: 24,
   },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '700',
+  sectionEyebrow: {
+    fontSize: 10.5,
+    letterSpacing: 2.2,
     color: COLORS.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: SPACING.sm,
+    marginBottom: 11,
   },
-  trackName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: SPACING.xs,
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 13,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.line,
   },
-  albumLabel: {
+  detailKey: {
+    fontSize: 11,
+    letterSpacing: 1.2,
+    color: COLORS.textMuted,
+  },
+  detailValue: {
     fontSize: 14,
-    color: COLORS.textSecondary,
-  },
-  albumValue: {
-    color: COLORS.primary,
-    fontWeight: '600',
-  },
-  genreSection: {
-    marginBottom: SPACING.lg,
+    fontWeight: '500',
+    color: COLORS.text,
   },
   genreRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.sm,
+    gap: 9,
   },
   genreChip: {
-    backgroundColor: COLORS.card,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: RADII.pill,
+    backgroundColor: COLORS.surfaceHover,
+    borderWidth: 1,
+    borderColor: COLORS.line,
+  },
+  genreChipAccent: {
+    backgroundColor: COLORS.accentSoft,
+    borderColor: COLORS.accentLine,
   },
   genreText: {
-    fontSize: 13,
-    color: COLORS.text,
+    fontSize: 12.5,
     fontWeight: '500',
+    color: COLORS.textSecondary,
+  },
+  genreTextAccent: {
+    color: COLORS.accent,
+  },
+  artistRow: {
+    flexDirection: 'row',
+    gap: 14,
+  },
+  artistImage: {
+    width: 64,
+    height: 64,
+    borderRadius: RADII.md,
+  },
+  artistPlaceholder: {
+    backgroundColor: COLORS.surfaceHover,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  artistName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  followers: {
+    fontSize: 13.5,
+    color: COLORS.textSecondary,
   },
 });

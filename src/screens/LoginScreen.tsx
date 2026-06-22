@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import { COLORS, SPACING } from '../constants/theme';
+import { COLORS, SPACING, RADII } from '../constants/theme';
 import {
   createAuthRequest,
   exchangeCode,
@@ -52,8 +52,19 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.hero}>
-        <Text style={styles.logo}>Soundmatch</Text>
-        <Text style={styles.tagline}>Swipe. Discover. Listen.</Text>
+        <View style={styles.logoIcon}>
+          <View style={styles.eqBars}>
+            {[0, 1, 2, 3].map((i) => (
+              <View key={i} style={[styles.eqBar, { height: [14, 20, 12, 18][i] }]} />
+            ))}
+          </View>
+        </View>
+        <Text style={styles.logo}>
+          SOUND<Text style={styles.logoAccent}>MATCH</Text>
+        </Text>
+        <Text style={styles.tagline}>
+          Swipe through songs like you'd swipe through dates. Heart the ones you love — build a mix of perfect matches.
+        </Text>
       </View>
 
       <View style={styles.bottom}>
@@ -66,9 +77,9 @@ export default function LoginScreen() {
           activeOpacity={0.8}
         >
           {loading ? (
-            <ActivityIndicator color={COLORS.text} />
+            <ActivityIndicator color={COLORS.spotifyInk} />
           ) : (
-            <Text style={styles.buttonText}>Connect with Spotify</Text>
+            <Text style={styles.buttonText}>Connect Spotify</Text>
           )}
         </TouchableOpacity>
 
@@ -87,21 +98,48 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
-    paddingTop: 120,
+    paddingTop: 140,
     paddingBottom: 60,
   },
   hero: {
     alignItems: 'center',
   },
+  logoIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 17,
+    backgroundColor: COLORS.accent,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  eqBars: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 3,
+    height: 22,
+  },
+  eqBar: {
+    width: 3,
+    borderRadius: 2,
+    backgroundColor: COLORS.accentInk,
+  },
   logo: {
-    fontSize: 42,
-    fontWeight: 'bold',
-    color: COLORS.primary,
-    marginBottom: SPACING.sm,
+    fontSize: 34,
+    fontWeight: '400',
+    color: COLORS.text,
+    letterSpacing: 0.3,
+    marginBottom: 18,
+  },
+  logoAccent: {
+    color: COLORS.accent,
   },
   tagline: {
-    fontSize: 18,
+    fontSize: 17,
+    lineHeight: 26,
     color: COLORS.textSecondary,
+    textAlign: 'center',
+    maxWidth: 300,
   },
   bottom: {
     alignItems: 'center',
@@ -113,21 +151,24 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   button: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 16,
+    backgroundColor: COLORS.spotify,
+    paddingVertical: 15,
     paddingHorizontal: 48,
-    borderRadius: 30,
+    borderRadius: 14,
     width: '100%',
     alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 10,
     marginBottom: SPACING.md,
   },
   buttonDisabled: {
     opacity: 0.5,
   },
   buttonText: {
-    color: COLORS.text,
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: COLORS.spotifyInk,
+    fontSize: 15,
+    fontWeight: '700',
   },
   disclaimer: {
     color: COLORS.textMuted,

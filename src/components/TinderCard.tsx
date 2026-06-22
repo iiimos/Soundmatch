@@ -10,9 +10,10 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { COLORS, RADII } from '../constants/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const SWIPE_THRESHOLD = Math.min(SCREEN_WIDTH * 0.3, 120);
+const SWIPE_THRESHOLD = Math.min(SCREEN_WIDTH * 0.3, 105);
 
 interface TinderCardProps {
   children: React.ReactNode;
@@ -102,34 +103,37 @@ export default function TinderCard({
 const styles = StyleSheet.create({
   card: {
     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-    borderRadius: 20,
+    borderRadius: RADII.card,
     overflow: 'hidden',
   },
   labelContainer: {
     position: 'absolute',
-    top: 40,
+    top: 30,
     zIndex: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
     borderWidth: 3,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   likeLabel: {
-    left: 20,
-    borderColor: '#1DB954',
+    left: 22,
+    borderColor: COLORS.like,
+    transform: [{ rotate: '-13deg' }],
   },
   dislikeLabel: {
-    right: 20,
-    borderColor: '#FF4458',
+    right: 22,
+    borderColor: COLORS.dislike,
+    transform: [{ rotate: '13deg' }],
   },
   labelText: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '400',
+    letterSpacing: 1,
   },
   likeText: {
-    color: '#1DB954',
+    color: COLORS.like,
   },
   dislikeText: {
-    color: '#FF4458',
+    color: COLORS.dislike,
   },
 });

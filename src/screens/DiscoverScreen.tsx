@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useStore } from '../store/useStore';
 import { fetchRecommendations } from '../services/spotify';
 import { Track } from '../types';
 import CardStack from '../components/CardStack';
-import { COLORS, SPACING } from '../constants/theme';
+import { COLORS, SPACING, RADII } from '../constants/theme';
 
 export default function DiscoverScreen() {
   const isFocused = useIsFocused();
@@ -82,7 +83,7 @@ export default function DiscoverScreen() {
   if (loading && recommendations.length === 0) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color={COLORS.accent} />
         <Text style={styles.loadingText}>Finding music for you...</Text>
       </View>
     );
@@ -92,9 +93,9 @@ export default function DiscoverScreen() {
     return (
       <View style={styles.centered}>
         <Text style={styles.errorText}>{error}</Text>
-        <Text style={styles.retryText} onPress={() => loadRecommendations(false)}>
-          Tap to retry
-        </Text>
+        <TouchableOpacity onPress={() => loadRecommendations(false)}>
+          <Text style={styles.retryText}>Tap to retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -102,8 +103,13 @@ export default function DiscoverScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Discover</Text>
-        <Text style={styles.subtitle}>Swipe to discover new music</Text>
+        <View>
+          <Text style={styles.eyebrow}>TUNED TO YOUR LISTENING</Text>
+          <Text style={styles.title}>Discover</Text>
+        </View>
+        <TouchableOpacity style={styles.filterBtn} activeOpacity={0.7}>
+          <Ionicons name="options-outline" size={20} color={COLORS.textSecondary} />
+        </TouchableOpacity>
       </View>
 
       <CardStack
@@ -123,19 +129,35 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   header: {
-    paddingTop: 60,
-    paddingBottom: SPACING.md,
-    alignItems: 'center',
+    paddingTop: 56,
+    paddingBottom: 10,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  eyebrow: {
+    fontSize: 10.5,
+    letterSpacing: 2.2,
+    color: COLORS.textMuted,
+    marginBottom: 7,
+    textTransform: 'uppercase',
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '400',
     color: COLORS.text,
-    marginBottom: SPACING.xs,
+    letterSpacing: 0.3,
   },
-  subtitle: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
+  filterBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1,
+    borderColor: COLORS.lineStrong,
+    backgroundColor: COLORS.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   centered: {
     flex: 1,
@@ -156,7 +178,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   retryText: {
-    color: COLORS.primary,
+    color: COLORS.accent,
     fontSize: 16,
     fontWeight: '600',
   },
