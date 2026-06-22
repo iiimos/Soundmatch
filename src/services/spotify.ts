@@ -402,6 +402,39 @@ export async function exportToSpotify(tracks: Track[]): Promise<string> {
   return playlistId;
 }
 
+export interface SpotifyPlaylistSummary {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  trackCount: number;
+  owner: string;
+}
+
+export async function fetchUserPlaylists(): Promise<SpotifyPlaylistSummary[]> {
+  const results: SpotifyPlaylistSummary[] = [];
+  let url: string | null = '/me/playlists?limit=50';
+
+  while (url) {
+    const response = await apiFetch(url);
+    if (!response.ok) break;
+    const data = await response.json();
+    for (const pl of data.items ?? []) {
+      if (pl) {
+        results.push({
+          id: pl.id,
+          name: pl.name,
+          imageUrl: pl.images?.[0]?.url ?? null,
+          trackCount: pl.tracks?.total ?? 0,
+          owner: pl.owner?.display_name ?? '',
+        });
+      }
+    }
+    url = data.next ? data.next.replace('https://api.spotify.com/v1', '') : null;
+  }
+
+  return results;
+}
+
 export async function fetchUserProfile(): Promise<UserProfile> {
   const response = await apiFetch('/me');
   const data = await response.json();

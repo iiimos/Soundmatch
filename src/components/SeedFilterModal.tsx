@@ -5,14 +5,19 @@ import {
   Modal,
   TouchableOpacity,
   ScrollView,
-  TextInput,
+  Image,
   StyleSheet,
   ActivityIndicator,
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../store/useStore';
-import { fetchAvailableGenreSeeds, fetchPlaylistTracks, parsePlaylistId } from '../services/spotify';
+import {
+  fetchAvailableGenreSeeds,
+  fetchPlaylistTracks,
+  fetchUserPlaylists,
+  SpotifyPlaylistSummary,
+} from '../services/spotify';
 import { COLORS, SPACING, RADII } from '../constants/theme';
 
 interface SeedFilterModalProps {
@@ -28,15 +33,22 @@ export default function SeedFilterModal({ visible, onClose }: SeedFilterModalPro
 
   const [availableGenres, setAvailableGenres] = useState<string[]>([]);
   const [selectedGenres, setSelectedGenres] = useState<string[]>(tasteProfile.seedGenres);
-  const [playlistInput, setPlaylistInput] = useState(tasteProfile.seedPlaylistUrl);
-  const [loadingPlaylist, setLoadingPlaylist] = useState(false);
   const [showAllGenres, setShowAllGenres] = useState(false);
+
+  const [playlists, setPlaylists] = useState<SpotifyPlaylistSummary[]>([]);
+  const [loadingPlaylists, setLoadingPlaylists] = useState(false);
+  const [applyingPlaylistId, setApplyingPlaylistId] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
       setSelectedGenres(tasteProfile.seedGenres);
-      setPlaylistInput(tasteProfile.seedPlaylistUrl);
       fetchAvailableGenreSeeds().then(setAvailableGenres).catch(() => {});
+
+      setLoadingPlaylists(true);
+      fetchUserPlaylists()
+        .then(setPlaylists)
+        .catch(() => {})
+        .finally(() => setLoadingPlaylists(false));
     }
   }, [visible]);
 
@@ -60,17 +72,11 @@ export default function SeedFilterModal({ visible, onClose }: SeedFilterModalPro
     onClose();
   };
 
-  const applyPlaylist = async () => {
-    const playlistId = parsePlaylistId(playlistInput);
-    if (!playlistId) {
-      Alert.alert('Invalid Link', 'Please paste a valid Spotify playlist URL.');
-      return;
-    }
-
-    setLoadingPlaylist(true);
+  const applyPlaylist = async (playlist: SpotifyPlaylistSummary) => {
+    setApplyingPlaylistId(playlist.id);
     try {
-      setTastePlaylistUrl(playlistInput);
-      const { trackIds, artistIds } = await fetchPlaylistTracks(playlistId);
+      setTastePlaylistUrl(`spotify:playlist:${playlist.id}`);
+      const { trackIds, artistIds } = await fetchPlaylistTracks(playlist.id);
       if (trackIds.length === 0 && artistIds.length === 0) {
         Alert.alert('Empty Playlist', 'This playlist has no tracks to seed from.');
         return;
@@ -80,7 +86,7 @@ export default function SeedFilterModal({ visible, onClose }: SeedFilterModalPro
     } catch (e: unknown) {
       Alert.alert('Error', e instanceof Error ? e.message : 'Failed to load playlist');
     } finally {
-      setLoadingPlaylist(false);
+      setApplyingPlaylistId(null);
     }
   };
 
@@ -134,33 +140,50 @@ export default function SeedFilterModal({ visible, onClose }: SeedFilterModalPro
               <Text style={styles.accentBtnText}>Apply Genres</Text>
             </TouchableOpacity>
 
-            {/* Playlist seed */}
+            {/* Your Playlists */}
             <View style={styles.divider} />
-            <Text style={styles.sectionTitle}>Reference Playlist</Text>
-            <Text style={styles.sectionDesc}>Paste a Spotify playlist link to seed from its tracks</Text>
+            <Text style={styles.sectionTitle}>Your Playlists</Text>
+            <Text style={styles.sectionDesc}>Tap a playlist to seed your discover stack from its tracks</Text>
 
-            <TextInput
-              style={styles.input}
-              placeholder="https://open.spotify.com/playlist/..."
-              placeholderTextColor={COLORS.textMuted}
-              value={playlistInput}
-              onChangeText={setPlaylistInput}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-
-            <TouchableOpacity
-              style={[styles.outlineBtn, loadingPlaylist && styles.btnDisabled]}
-              onPress={applyPlaylist}
-              disabled={loadingPlaylist}
-              activeOpacity={0.8}
-            >
-              {loadingPlaylist ? (
-                <ActivityIndicator color={COLORS.accent} size="small" />
-              ) : (
-                <Text style={styles.outlineBtnText}>Apply Playlist</Text>
-              )}
-            </TouchableOpacity>
+            {loadingPlaylists ? (
+              <ActivityIndicator color={COLORS.accent} style={{ marginVertical: 20 }} />
+            ) : playlists.length === 0 ? (
+              <Text style={styles.emptyText}>No playlists found</Text>
+            ) : (
+              playlists.map((pl) => {
+                const isApplying = applyingPlaylistId === pl.id;
+                return (
+                  <TouchableOpacity
+                    key={pl.id}
+                    style={styles.playlistRow}
+                    onPress={() => applyPlaylist(pl)}
+                    disabled={applyingPlaylistId !== null}
+                    activeOpacity={0.7}
+                  >
+                    {pl.imageUrl ? (
+                      <Image source={{ uri: pl.imageUrl }} style={styles.playlistCover} />
+                    ) : (
+                      <View style={[styles.playlistCover, styles.playlistCoverPlaceholder]}>
+                        <Ionicons name="musical-notes" size={18} color={COLORS.textMuted} />
+                      </View>
+                    )}
+                    <View style={styles.playlistInfo}>
+                      <Text style={styles.playlistName} numberOfLines={1}>{pl.name}</Text>
+                      <Text style={styles.playlistMeta} numberOfLines={1}>
+                        {pl.owner} · {pl.trackCount} tracks
+                      </Text>
+                    </View>
+                    {isApplying ? (
+                      <ActivityIndicator color={COLORS.accent} size="small" />
+                    ) : (
+                      <View style={styles.seedBtn}>
+                        <Ionicons name="arrow-forward" size={16} color={COLORS.accent} />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })
+            )}
           </ScrollView>
         </View>
       </View>
@@ -275,30 +298,52 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.line,
     marginVertical: 22,
   },
-  input: {
-    backgroundColor: COLORS.surface,
-    borderRadius: RADII.md,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 14,
-    fontSize: 14,
-    color: COLORS.text,
-    borderWidth: 1,
-    borderColor: COLORS.line,
-    marginBottom: SPACING.md,
+  emptyText: {
+    fontSize: 13.5,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
+    paddingVertical: 12,
   },
-  outlineBtn: {
-    borderWidth: 1.5,
-    borderColor: COLORS.accent,
-    paddingVertical: 14,
-    borderRadius: 14,
+  playlistRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 13,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.line,
+  },
+  playlistCover: {
+    width: 50,
+    height: 50,
+    borderRadius: RADII.sm,
+    backgroundColor: COLORS.surface,
+  },
+  playlistCoverPlaceholder: {
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  outlineBtnText: {
-    color: COLORS.accent,
-    fontSize: 15,
-    fontWeight: '700',
+  playlistInfo: {
+    flex: 1,
+    minWidth: 0,
   },
-  btnDisabled: {
-    opacity: 0.6,
+  playlistName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 2,
+  },
+  playlistMeta: {
+    fontSize: 12.5,
+    color: COLORS.textMuted,
+  },
+  seedBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: COLORS.accentLine,
+    backgroundColor: COLORS.accentSoft,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
