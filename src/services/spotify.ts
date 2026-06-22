@@ -27,7 +27,7 @@ const DISCOVERY = {
 };
 
 const REDIRECT_URI = Platform.OS === 'web'
-  ? 'https://swift-spiders-swim.loca.lt'
+  ? 'https://dirty-ads-happen.loca.lt'
   : makeRedirectUri({ scheme: 'soundmatch', path: 'spotify-auth-callback' });
 
 const SCOPES = [
