@@ -185,8 +185,11 @@ function mapTracks(items: SpotifyTrack[]): Track[] {
 }
 
 async function searchTracks(query: string, limit: number, offset: number): Promise<SpotifyTrack[]> {
-  const url = `/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}&offset=${offset}`;
-  console.log('[Soundmatch] Search:', query, 'offset', offset);
+  // Spotify caps search pagination: offset + limit must be <= 1000, limit 1-50.
+  const safeLimit = Math.min(Math.max(limit, 1), 50);
+  const safeOffset = Math.min(Math.max(offset, 0), 1000 - safeLimit);
+  const url = `/search?q=${encodeURIComponent(query)}&type=track&market=US&limit=${safeLimit}&offset=${safeOffset}`;
+  console.log('[Soundmatch] Search URL:', url);
   const response = await apiFetch(url);
   if (!response.ok) {
     const text = await response.text();
