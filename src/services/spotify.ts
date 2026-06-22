@@ -181,7 +181,8 @@ export async function fetchRecommendations(options: {
   const year = 2015 + Math.floor(Math.random() * 11);
   const offset = Math.floor(Math.random() * 50);
 
-  const query = encodeURIComponent(`genre:${genre} year:${year}`);
+  const genreQuery = genre.replace(/-/g, ' ');
+  const query = encodeURIComponent(`genre:"${genreQuery}" year:${year}`);
   const response = await apiFetch(`/search?q=${query}&type=track&limit=${limit}&offset=${offset}`);
   const data = await response.json();
 
@@ -233,9 +234,20 @@ export async function fetchTrackArtistId(trackId: string): Promise<string> {
 }
 
 export async function fetchAvailableGenreSeeds(): Promise<string[]> {
-  const response = await apiFetch('/recommendations/available-genre-seeds');
-  const data = await response.json();
-  return data.genres ?? [];
+  return [
+    'acoustic', 'afrobeat', 'alt-rock', 'alternative', 'ambient',
+    'blues', 'classical', 'club', 'country', 'dance',
+    'deep-house', 'disco', 'drum-and-bass', 'dubstep', 'edm',
+    'electro', 'electronic', 'emo', 'folk', 'funk',
+    'garage', 'gospel', 'goth', 'grunge', 'hard-rock',
+    'hardcore', 'hardstyle', 'heavy-metal', 'hip-hop', 'house',
+    'indie', 'indie-pop', 'industrial', 'jazz', 'k-pop',
+    'latin', 'metal', 'minimal-techno', 'opera', 'party',
+    'piano', 'pop', 'punk', 'r-n-b', 'reggae',
+    'reggaeton', 'rock', 'romance', 'sad', 'singer-songwriter',
+    'ska', 'sleep', 'soul', 'synth-pop', 'techno',
+    'trance', 'trap', 'trip-hop', 'world-music',
+  ];
 }
 
 export async function batchFetchArtists(
