@@ -19,8 +19,10 @@ const DISCOVERY = {
 import { Platform } from 'react-native';
 
 const REDIRECT_URI = Platform.OS === 'web'
-  ? 'https://auth.expo.io/@iiimos/soundmatch'
+  ? makeRedirectUri({ preferLocalhost: true })
   : makeRedirectUri({ scheme: 'soundmatch', path: 'spotify-auth-callback' });
+
+console.log('[Soundmatch] Redirect URI:', REDIRECT_URI);
 
 const SCOPES = [
   'user-read-private',

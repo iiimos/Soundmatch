@@ -34,7 +34,7 @@ export default function LoginScreen() {
     setError(null);
 
     try {
-      const result = await request.promptAsync(DISCOVERY, { useProxy: true });
+      const result = await request.promptAsync(DISCOVERY);
 
       if (result.type === 'success' && result.params.code) {
         await exchangeCode(result.params.code, request);
