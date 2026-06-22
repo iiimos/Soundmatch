@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 14,
     paddingVertical: 15,
-    borderRadius: RADII.md,
+    borderRadius: RADII.lg,
     gap: 10,
   },
   exportDone: {
@@ -352,14 +352,14 @@ const styles = StyleSheet.create({
   thumbnail: {
     width: 50,
     height: 50,
-    borderRadius: RADII.sm,
+    borderRadius: RADII.md,
     backgroundColor: COLORS.surface,
   },
   playOverlay: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.35)',
-    borderRadius: RADII.sm,
+    borderRadius: RADII.md,
     justifyContent: 'center',
     alignItems: 'center',
   },

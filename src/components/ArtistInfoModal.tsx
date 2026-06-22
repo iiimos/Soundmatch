@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   coverArt: {
     width: 84,
     height: 84,
-    borderRadius: RADII.md,
+    borderRadius: RADII.lg,
   },
   coverPlaceholder: {
     backgroundColor: COLORS.surfaceHover,
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   artistImage: {
     width: 64,
     height: 64,
-    borderRadius: RADII.md,
+    borderRadius: RADII.lg,
   },
   artistPlaceholder: {
     backgroundColor: COLORS.surfaceHover,

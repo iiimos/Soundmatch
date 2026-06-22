@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surfaceElevated,
     borderWidth: 1,
     borderColor: COLORS.line,
-    borderRadius: RADII.md,
+    borderRadius: RADII.lg,
     padding: 13,
   },
   playBtn: {

@@ -387,6 +387,7 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 23,
+    overflow: 'hidden',
   },
   avatarPlaceholder: {
     backgroundColor: COLORS.accent,
@@ -407,7 +408,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.line,
-    borderRadius: 12,
+    borderRadius: RADII.md,
     padding: 4,
     gap: 4,
   },
@@ -443,7 +444,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.line,
-    borderRadius: RADII.md,
+    borderRadius: RADII.lg,
     padding: 16,
   },
   statBig: {
@@ -463,7 +464,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.line,
-    borderRadius: RADII.md,
+    borderRadius: RADII.lg,
     padding: 18,
     marginBottom: 18,
   },
@@ -588,7 +589,7 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: COLORS.surfaceElevated,
-    borderRadius: 12,
+    borderRadius: RADII.md,
     paddingHorizontal: SPACING.md,
     paddingVertical: 14,
     fontSize: 14,

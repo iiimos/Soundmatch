@@ -6,6 +6,7 @@ import { useStore } from '../store/useStore';
 import { fetchRecommendations } from '../services/spotify';
 import { Track } from '../types';
 import CardStack from '../components/CardStack';
+import SeedFilterModal from '../components/SeedFilterModal';
 import { COLORS, SPACING, RADII } from '../constants/theme';
 
 export default function DiscoverScreen() {
@@ -19,6 +20,7 @@ export default function DiscoverScreen() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filterVisible, setFilterVisible] = useState(false);
   const fetchingRef = useRef(false);
   const lastTasteVersionRef = useRef(tasteVersion);
 
@@ -107,7 +109,11 @@ export default function DiscoverScreen() {
           <Text style={styles.eyebrow}>TUNED TO YOUR LISTENING</Text>
           <Text style={styles.title}>Discover</Text>
         </View>
-        <TouchableOpacity style={styles.filterBtn} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.filterBtn}
+          activeOpacity={0.7}
+          onPress={() => setFilterVisible(true)}
+        >
           <Ionicons name="options-outline" size={20} color={COLORS.textSecondary} />
         </TouchableOpacity>
       </View>
@@ -118,6 +124,11 @@ export default function DiscoverScreen() {
         onSwipeLeft={handleSwipeLeft}
         onNearEnd={handleNearEnd}
         isFocused={isFocused}
+      />
+
+      <SeedFilterModal
+        visible={filterVisible}
+        onClose={() => setFilterVisible(false)}
       />
     </View>
   );
