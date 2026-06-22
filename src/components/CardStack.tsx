@@ -32,7 +32,13 @@ export default function CardStack({
   const [modalTrack, setModalTrack] = useState<Track | null>(null);
   const playerRef = useRef<AudioPlayer | null>(null);
   const currentIndexRef = useRef(currentIndex);
+  const prevTracksRef = useRef(tracks);
   currentIndexRef.current = currentIndex;
+
+  if (tracks !== prevTracksRef.current && tracks.length > 0 && tracks[0]?.id !== prevTracksRef.current[0]?.id) {
+    prevTracksRef.current = tracks;
+    setCurrentIndex(0);
+  }
 
   const currentTrack = tracks[currentIndex] ?? null;
 

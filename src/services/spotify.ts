@@ -212,43 +212,24 @@ export async function fetchRecommendations(_options: {
   seedArtistIds?: string[];
   limit?: number;
 }): Promise<Track[]> {
-  const ranges = ['short_term', 'medium_term', 'long_term'];
-  const range = ranges[Math.floor(Math.random() * ranges.length)];
+  const extractItems = (d: unknown) => ((d as { items?: SpotifyTrack[] }).items ?? []);
+  const extractWrapped = (d: unknown) =>
+    ((d as { items?: { track: SpotifyTrack }[] }).items ?? [])
+      .map((i) => i.track)
+      .filter(Boolean);
 
-  const collected: SpotifyTrack[] = [];
-
-  // Top tracks (user-top-read)
-  collected.push(
-    ...(await fetchFromEndpoint(
-      `/me/top/tracks?time_range=${range}&limit=50`,
-      (d) => ((d as { items?: SpotifyTrack[] }).items ?? []),
-    )),
-  );
-
-  // Recently played (user-read-recently-played)
-  collected.push(
-    ...(await fetchFromEndpoint(
-      `/me/player/recently-played?limit=50`,
-      (d) =>
-        ((d as { items?: { track: SpotifyTrack }[] }).items ?? [])
-          .map((i) => i.track)
-          .filter(Boolean),
-    )),
-  );
-
-  // Saved tracks (user-library-read)
   const savedOffset = Math.floor(Math.random() * 20) * 50;
-  collected.push(
-    ...(await fetchFromEndpoint(
-      `/me/tracks?limit=50&offset=${savedOffset}`,
-      (d) =>
-        ((d as { items?: { track: SpotifyTrack }[] }).items ?? [])
-          .map((i) => i.track)
-          .filter(Boolean),
-    )),
-  );
 
-  // Dedupe by id, then shuffle.
+  const [short, medium, long, recent, saved] = await Promise.all([
+    fetchFromEndpoint('/me/top/tracks?time_range=short_term&limit=50', extractItems),
+    fetchFromEndpoint('/me/top/tracks?time_range=medium_term&limit=50', extractItems),
+    fetchFromEndpoint('/me/top/tracks?time_range=long_term&limit=50', extractItems),
+    fetchFromEndpoint('/me/player/recently-played?limit=50', extractWrapped),
+    fetchFromEndpoint(`/me/tracks?limit=50&offset=${savedOffset}`, extractWrapped),
+  ]);
+
+  const collected = [...short, ...medium, ...long, ...recent, ...saved];
+
   const seen = new Set<string>();
   const unique = collected.filter((t) => {
     if (!t || !t.id || seen.has(t.id)) return false;
