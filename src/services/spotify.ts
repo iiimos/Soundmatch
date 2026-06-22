@@ -27,7 +27,7 @@ const DISCOVERY = {
 };
 
 const REDIRECT_URI = Platform.OS === 'web'
-  ? 'https://three-keys-kick.loca.lt'
+  ? 'http://127.0.0.1:8081'
   : makeRedirectUri({ scheme: 'soundmatch', path: 'spotify-auth-callback' });
 
 const SCOPES = [
