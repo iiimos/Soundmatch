@@ -21,6 +21,7 @@ interface SongCardProps {
   isPlaying: boolean;
   onTogglePlay: () => void;
   onInfoPress: () => void;
+  hidePreviewUnavailable?: boolean;
 }
 
 export default function SongCard({
@@ -28,6 +29,7 @@ export default function SongCard({
   isPlaying,
   onTogglePlay,
   onInfoPress,
+  hidePreviewUnavailable = false,
 }: SongCardProps) {
   const hasPreview = track.previewUrl !== null;
 
@@ -50,7 +52,7 @@ export default function SongCard({
         <Ionicons name="information-circle-outline" size={22} color={COLORS.text} />
       </TouchableOpacity>
 
-      {!hasPreview && (
+      {!hasPreview && !hidePreviewUnavailable && (
         <View style={styles.noPreviewBadge}>
           <Ionicons name="volume-mute" size={14} color={COLORS.text} />
           <Text style={styles.noPreviewText}>Preview Unavailable</Text>

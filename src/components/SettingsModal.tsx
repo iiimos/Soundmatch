@@ -17,8 +17,22 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
+function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  return (
+    <TouchableOpacity
+      onPress={onToggle}
+      activeOpacity={0.7}
+      style={[styles.toggle, on && styles.toggleOn]}
+    >
+      <View style={[styles.toggleThumb, on && styles.toggleThumbOn]} />
+    </TouchableOpacity>
+  );
+}
+
 export default function SettingsModal({ visible, onClose }: SettingsModalProps) {
   const clearRecommendations = useStore((s) => s.clearRecommendations);
+  const hidePreviewUnavailable = useStore((s) => s.hidePreviewUnavailable);
+  const setHidePreviewUnavailable = useStore((s) => s.setHidePreviewUnavailable);
 
   const handleClearCache = () => {
     clearRecommendations();
@@ -49,6 +63,23 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
               <Ionicons name="close" size={17} color={COLORS.textSecondary} />
             </TouchableOpacity>
           </View>
+
+          {/* Hide preview unavailable toggle */}
+          <View style={styles.row}>
+            <View style={styles.rowIcon}>
+              <Ionicons name="volume-mute-outline" size={17} color={COLORS.accent} />
+            </View>
+            <View style={styles.rowText}>
+              <Text style={styles.rowTitle}>Hide "Preview Unavailable"</Text>
+              <Text style={styles.rowDesc}>Remove the badge from song cards</Text>
+            </View>
+            <Toggle
+              on={hidePreviewUnavailable}
+              onToggle={() => setHidePreviewUnavailable(!hidePreviewUnavailable)}
+            />
+          </View>
+
+          <View style={styles.divider} />
 
           <TouchableOpacity style={styles.row} onPress={handleClearCache} activeOpacity={0.7}>
             <View style={styles.rowIcon}>
@@ -148,5 +179,30 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: COLORS.line,
+  },
+  toggle: {
+    width: 46,
+    height: 28,
+    borderRadius: RADII.pill,
+    backgroundColor: COLORS.surfaceHover,
+    padding: 3,
+    justifyContent: 'center',
+  },
+  toggleOn: {
+    backgroundColor: COLORS.accent,
+  },
+  toggleThumb: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.4,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  toggleThumbOn: {
+    alignSelf: 'flex-end',
   },
 });

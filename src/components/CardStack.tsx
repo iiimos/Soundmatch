@@ -2,8 +2,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { createAudioPlayer, setAudioModeAsync, AudioPlayer } from 'expo-audio';
 import { Track } from '../types';
+import { useStore } from '../store/useStore';
 import TinderCard from './TinderCard';
 import SongCard from './SongCard';
+import MockPlayer from './MockPlayer';
 import ArtistInfoModal from './ArtistInfoModal';
 import { COLORS } from '../constants/theme';
 
@@ -34,6 +36,8 @@ export default function CardStack({
   const currentIndexRef = useRef(currentIndex);
   const prevTracksRef = useRef(tracks);
   currentIndexRef.current = currentIndex;
+
+  const hidePreviewUnavailable = useStore((s) => s.hidePreviewUnavailable);
 
   if (tracks !== prevTracksRef.current && tracks.length > 0 && tracks[0]?.id !== prevTracksRef.current[0]?.id) {
     prevTracksRef.current = tracks;
@@ -160,6 +164,7 @@ export default function CardStack({
                     isPlaying={isTop && isPlaying}
                     onTogglePlay={isTop ? togglePlay : () => {}}
                     onInfoPress={isTop ? () => setModalTrack(track) : () => {}}
+                    hidePreviewUnavailable={hidePreviewUnavailable}
                   />
                 </TinderCard>
               </View>
@@ -167,6 +172,9 @@ export default function CardStack({
           })
           .reverse()}
       </View>
+
+      {/* Mock player peeking from under the card */}
+      <MockPlayer track={currentTrack} />
 
       <ArtistInfoModal
         visible={modalTrack !== null}

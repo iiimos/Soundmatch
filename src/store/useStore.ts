@@ -32,6 +32,10 @@ interface AppState {
   setTasteSeeds: (trackIds: string[], artistIds: string[]) => void;
   clearTasteSeeds: () => void;
 
+  // Settings
+  hidePreviewUnavailable: boolean;
+  setHidePreviewUnavailable: (val: boolean) => void;
+
   // Discovery
   discoveryGenres: string[];
   playlistUrl: string;
@@ -98,6 +102,9 @@ export const useStore = create<AppState>((set) => ({
     set((state) => ({
       tasteProfile: { ...state.tasteProfile, seedTrackIds: [], seedArtistIds: [], seedPlaylistUrl: '' },
     })),
+
+  hidePreviewUnavailable: false,
+  setHidePreviewUnavailable: (val) => set({ hidePreviewUnavailable: val }),
 
   discoveryGenres: ['pop', 'rock', 'hip-hop', 'electronic', 'r-n-b'],
   playlistUrl: '',
