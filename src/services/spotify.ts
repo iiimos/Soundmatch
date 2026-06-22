@@ -16,7 +16,11 @@ const DISCOVERY = {
   tokenEndpoint: 'https://accounts.spotify.com/api/token',
 };
 
-const REDIRECT_URI = makeRedirectUri({ scheme: 'soundmatch', path: 'spotify-auth-callback' });
+import { Platform } from 'react-native';
+
+const REDIRECT_URI = Platform.OS === 'web'
+  ? 'https://auth.expo.io/@iiimos/soundmatch'
+  : makeRedirectUri({ scheme: 'soundmatch', path: 'spotify-auth-callback' });
 
 const SCOPES = [
   'user-read-private',
