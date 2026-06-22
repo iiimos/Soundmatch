@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoundMatch · Explorations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=Hanken+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app/tokens.css">
+<style>
+  html, body { margin: 0; height: 100%; }
+  body { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script src="app/data.js"></script>
+  <script type="text/babel" src="app/ios-frame.jsx"></script>
+  <script type="text/babel" src="app/ui.jsx"></script>
+  <script type="text/babel" src="app/discover.jsx"></script>
+  <script type="text/babel" src="app/screens.jsx"></script>
+  <script type="text/babel" src="app/variations.jsx"></script>
+  <script type="text/babel" src="app/variations2.jsx"></script>
+  <script type="text/babel" src="app/design-canvas.jsx"></script>
+
+  <script type="text/babel">
+    const ABW = 402, ABH = 874;
+    const abStyle = { background: 'transparent', boxShadow: 'none', borderRadius: 0, overflow: 'visible' };
+    const Board = ({ id, label, children }) => (
+      <DCArtboard id={id} label={label} width={ABW} height={ABH} style={abStyle}>{children}</DCArtboard>
+    );
+
+    // ---- reused interactive screens ----
+    const StackPhone = ({ layout }) => (
+      <Phone tab="discover" pad={44}>
+        <DiscoverScreen tracks={window.SM_TRACKS} onLike={() => {}} onPass={() => {}} onRewind={() => {}} openInfo={() => {}} layout={layout} useReal={false} />
+      </Phone>
+    );
+    const LikedPhone = ({ layout }) => (
+      <Phone tab="liked" pad={44}><LikedScreen liked={window.LIKED4} openInfo={() => {}} layout={layout} /></Phone>
+    );
+
+    function Explorations() {
+      return (
+        <DesignCanvas>
+          <DCSection id="onboarding" title="Onboarding · Taste setup" subtitle="Three ways to learn what a new listener loves">
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="onb-a" label="A · Chip cloud"><Phone pad={44}><OnbChips /></Phone></DCArtboard>
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="onb-b" label="B · Genre tiles"><Phone pad={44}><OnbTiles /></Phone></DCArtboard>
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="onb-c" label="C · Taste dials"><Phone pad={44}><OnbDials /></Phone></DCArtboard>
+          </DCSection>
+
+          <DCSection id="profile" title="Profile" subtitle="Identity, settings & a quick read on the listener">
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="prof-a" label="A · Stats + Settings"><Phone tab="profile" pad={44}><ProfileScreen stats={window.SM_STATS} likedCount={142} onReplayOnboarding={() => {}} /></Phone></DCArtboard>
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="prof-b" label="B · Editorial hero"><Phone tab="profile" pad={20}><ProfileEditorial /></Phone></DCArtboard>
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="prof-c" label="C · List / settings-forward"><Phone tab="profile" pad={44}><ProfileList /></Phone></DCArtboard>
+          </DCSection>
+
+          <DCSection id="stats" title="Listening stats" subtitle="How the same data can feel like dashboard, Wrapped, or fingerprint">
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="stat-a" label="A · Bars & tiles"><Phone tab="profile" pad={44}><StatsBars /></Phone></DCArtboard>
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="stat-b" label="B · Wrapped"><Phone tab="profile" pad={44}><StatsWrapped /></Phone></DCArtboard>
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="stat-c" label="C · Taste profile"><Phone tab="profile" pad={44}><StatsProfile /></Phone></DCArtboard>
+          </DCSection>
+
+          <DCSection id="liked" title="Liked songs tab" subtitle="Playlist-style with one-tap Spotify export">
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="lik-a" label="A · List + players"><LikedPhone layout="list" /></DCArtboard>
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="lik-b" label="B · Compact"><LikedPhone layout="compact" /></DCArtboard>
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="lik-c" label="C · Artwork grid"><LikedPhone layout="grid" /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="info" title="Info panel" subtitle="Surfacing the story behind ‘So Long’">
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="inf-a" label="A · Bottom sheet"><Phone pad={0}><InfoBottomSheet /></Phone></DCArtboard>
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="inf-b" label="B · Full screen"><Phone pad={0}><InfoFull /></Phone></DCArtboard>
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="inf-c" label="C · Artist-led"><Phone pad={0}><InfoArtist /></Phone></DCArtboard>
+          </DCSection>
+
+          <DCSection id="stack" title="Song stack · So Long — Seba" subtitle="The swipe deck — drag to like / dislike, or use the buttons">
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="stk-a" label="A · Classic"><StackPhone layout="classic" /></DCArtboard>
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="stk-b" label="B · Full-bleed"><StackPhone layout="fullbleed" /></DCArtboard>
+            <DCArtboard width={ABW} height={ABH} style={abStyle} id="stk-c" label="C · Framed"><StackPhone layout="framed" /></DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Explorations />);
+  </script>
+</body>
+</html>
