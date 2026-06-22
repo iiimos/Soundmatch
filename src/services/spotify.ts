@@ -36,6 +36,8 @@ const SCOPES = [
   'playlist-modify-public',
   'playlist-modify-private',
   'user-top-read',
+  'user-library-read',
+  'user-read-recently-played',
 ];
 
 const API_BASE = 'https://api.spotify.com/v1';
@@ -104,7 +106,7 @@ export async function restoreSession(): Promise<boolean> {
     return refreshAccessToken();
   }
 
-  useStore.getState().setTokens(accessToken, refreshToken);
+  useStore.getState().setTokens(accessToken, refreshToken ?? '');
   return true;
 }
 
@@ -184,67 +186,77 @@ function mapTracks(items: SpotifyTrack[]): Track[] {
     }));
 }
 
-async function searchTracks(query: string, limit: number, offset: number): Promise<SpotifyTrack[]> {
-  // Spotify caps search pagination: offset + limit must be <= 1000, limit 1-50.
-  const safeLimit = Math.min(Math.max(limit, 1), 50);
-  const safeOffset = Math.min(Math.max(offset, 0), 1000 - safeLimit);
-  const url = `/search?q=${encodeURIComponent(query)}&type=track&market=US&limit=${safeLimit}&offset=${safeOffset}`;
-  console.log('[Soundmatch] Search URL:', url);
+async function fetchFromEndpoint(
+  url: string,
+  extract: (data: unknown) => SpotifyTrack[],
+): Promise<SpotifyTrack[]> {
+  console.log('[Soundmatch] Fetch:', url);
   const response = await apiFetch(url);
   if (!response.ok) {
     const text = await response.text();
-    console.log('[Soundmatch] Search failed', response.status, text);
+    console.log('[Soundmatch] Fetch failed', response.status, text);
     return [];
   }
   const data = await response.json();
-  const items = data.tracks?.items ?? [];
-  console.log('[Soundmatch] Search returned', items.length, 'tracks');
+  const items = extract(data);
+  console.log('[Soundmatch] Fetch returned', items.length, 'tracks');
   return items;
 }
 
-export async function fetchRecommendations(options: {
+// Spotify locked /search & /recommendations to Extended-Quota apps (Nov 2024).
+// Build the discovery feed from the user's own library, which still works in
+// Development Mode: top tracks, recently played, and saved tracks.
+export async function fetchRecommendations(_options: {
   seedGenres?: string[];
   seedTrackIds?: string[];
   seedArtistIds?: string[];
   limit?: number;
 }): Promise<Track[]> {
-  const { seedGenres = [], seedArtistIds = [], limit = 20 } = options;
+  const ranges = ['short_term', 'medium_term', 'long_term'];
+  const range = ranges[Math.floor(Math.random() * ranges.length)];
 
-  // If we have artist seeds (from a playlist), use one of them as a search keyword.
-  if (seedArtistIds.length > 0) {
-    try {
-      const artistId = seedArtistIds[Math.floor(Math.random() * seedArtistIds.length)];
-      const response = await apiFetch(`/artists/${artistId}/top-tracks?market=US`);
-      if (response.ok) {
-        const data = await response.json();
-        const tracks = mapTracks(data.tracks ?? []);
-        if (tracks.length > 0) return tracks.sort(() => Math.random() - 0.5);
-      }
-    } catch (e) {
-      console.log('[Soundmatch] Artist seed fetch failed', e);
-    }
-  }
+  const collected: SpotifyTrack[] = [];
 
-  const genres = seedGenres.length > 0 ? seedGenres : ['pop', 'rock', 'hip-hop', 'electronic'];
-  const genre = genres[Math.floor(Math.random() * genres.length)];
-  const genreQuery = genre.replace(/-/g, ' ');
-  const offset = Math.floor(Math.random() * 100);
+  // Top tracks (user-top-read)
+  collected.push(
+    ...(await fetchFromEndpoint(
+      `/me/top/tracks?time_range=${range}&limit=50`,
+      (d) => ((d as { items?: SpotifyTrack[] }).items ?? []),
+    )),
+  );
 
-  // Strategy 1: genre + year filter (precise but can be empty)
-  const year = 2010 + Math.floor(Math.random() * 16);
-  let items = await searchTracks(`genre:"${genreQuery}" year:${year}`, limit, offset % 100);
+  // Recently played (user-read-recently-played)
+  collected.push(
+    ...(await fetchFromEndpoint(
+      `/me/player/recently-played?limit=50`,
+      (d) =>
+        ((d as { items?: { track: SpotifyTrack }[] }).items ?? [])
+          .map((i) => i.track)
+          .filter(Boolean),
+    )),
+  );
 
-  // Strategy 2: genre filter only
-  if (items.length === 0) {
-    items = await searchTracks(`genre:"${genreQuery}"`, limit, offset % 100);
-  }
+  // Saved tracks (user-library-read)
+  const savedOffset = Math.floor(Math.random() * 20) * 50;
+  collected.push(
+    ...(await fetchFromEndpoint(
+      `/me/tracks?limit=50&offset=${savedOffset}`,
+      (d) =>
+        ((d as { items?: { track: SpotifyTrack }[] }).items ?? [])
+          .map((i) => i.track)
+          .filter(Boolean),
+    )),
+  );
 
-  // Strategy 3: plain keyword (always returns something)
-  if (items.length === 0) {
-    items = await searchTracks(genreQuery, limit, offset % 50);
-  }
+  // Dedupe by id, then shuffle.
+  const seen = new Set<string>();
+  const unique = collected.filter((t) => {
+    if (!t || !t.id || seen.has(t.id)) return false;
+    seen.add(t.id);
+    return true;
+  });
 
-  return mapTracks(items).sort(() => Math.random() - 0.5);
+  return mapTracks(unique).sort(() => Math.random() - 0.5);
 }
 
 interface SpotifyTrack {
