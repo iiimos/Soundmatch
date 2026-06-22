@@ -5,7 +5,16 @@ import {
   refreshAsync,
   TokenResponse,
 } from 'expo-auth-session';
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStoreNative from 'expo-secure-store';
+import { Platform } from 'react-native';
+
+const SecureStore = Platform.OS === 'web'
+  ? {
+      getItemAsync: async (key: string) => localStorage.getItem(key),
+      setItemAsync: async (key: string, value: string) => localStorage.setItem(key, value),
+      deleteItemAsync: async (key: string) => localStorage.removeItem(key),
+    }
+  : SecureStoreNative;
 import { useStore } from '../store/useStore';
 import { Track, UserProfile } from '../types';
 
@@ -15,8 +24,6 @@ const DISCOVERY = {
   authorizationEndpoint: 'https://accounts.spotify.com/authorize',
   tokenEndpoint: 'https://accounts.spotify.com/api/token',
 };
-
-import { Platform } from 'react-native';
 
 const REDIRECT_URI = Platform.OS === 'web'
   ? makeRedirectUri({ preferLocalhost: true })
