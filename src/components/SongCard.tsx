@@ -13,7 +13,7 @@ import { Track } from '../types';
 import { COLORS, SPACING } from '../constants/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = SCREEN_WIDTH * 0.9;
+const CARD_WIDTH = Math.min(SCREEN_WIDTH * 0.9, 380);
 const CARD_HEIGHT = CARD_WIDTH * 1.35;
 
 interface SongCardProps {
